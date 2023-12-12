@@ -1,12 +1,11 @@
 use reth_db::open_db_read_only;
 use reth_db_provider::BlockReader;
 use reth_db_provider::{
-    BlockExecutor, ProviderError, ProviderFactory, providers::BundleStateProvider, BundleStateDataProvider, BundleStateWithReceipts, Chain, ExecutorFactory, StateRootProvider, HeaderProvider,
-    providers::BlockchainProvider
+    BlockExecutor, ProviderFactory
 };
 
 use reth_primitives::{
-    Address, MAINNET, BlockHashOrNumber, U256
+    MAINNET, BlockHashOrNumber, U256
 };
 
 use reth_revm::{
@@ -16,6 +15,7 @@ use reth_revm::{
 
 use std::path::Path;
 use std::sync::Arc;
+use rand::distributions::{Distribution, Uniform};
 use tracing::info;
 
 // #[derive(Parser, Debug)]
@@ -27,21 +27,30 @@ fn main() {
     let chain_spec = MAINNET.clone();
 
     let provider = Arc::new(ProviderFactory::new(&db, chain_spec.clone()));
-    let old_block_num = 18690696;
-    let new_block_num = old_block_num + 1;
-    let new_block = provider.block(BlockHashOrNumber::Number(new_block_num)).unwrap().unwrap();
+
+    let loop_time = 1000;
+
+    for i in 0..loop_time {
+        let block_range = 18650000..18768100;
+
+        let mut rng = rand::thread_rng();
+        let block_uniform_range = Uniform::from(block_range);
+
+        let old_block_num= block_uniform_range.sample(&mut rng);
+        // let old_block_num = 18690696;
+        let new_block_num = old_block_num + 1;
+        let new_block = provider.block(BlockHashOrNumber::Number(new_block_num)).unwrap().unwrap();
 
 
-    let state_provider = provider.history_by_block_number(old_block_num).unwrap();
+        let state_provider = provider.history_by_block_number(old_block_num).unwrap();
 
-    let mut executor = EVMProcessor::new_with_db(chain_spec.clone(), StateProviderDatabase::new(state_provider));
+        let mut executor = EVMProcessor::new_with_db(chain_spec.clone(), StateProviderDatabase::new(state_provider));
 
-    let result = executor.execute_and_verify_receipt(&new_block, U256::ZERO, None).unwrap();
+        let result = executor.execute_and_verify_receipt(&new_block, U256::ZERO, None).unwrap();
 
-    let stat = executor.stats();
-    println!("{:?}", stat);
+        let stat = executor.stats();
+        println!("{:?}", stat);
 
-    let stat = executor.receipts;
-    println!("{:?}", stat);
-
+        println!("new block number {:?}, round: {:?}", new_block_num, i);
+    }
 }
