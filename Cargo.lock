@@ -735,7 +735,7 @@ checksum = "67ba02a97a2bd10f4b59b25c7973101c79642302776489e030cd13cdab09ed15"
 [[package]]
 name = "codecs-derive"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "convert_case 0.6.0",
  "parity-scale-codec",
@@ -3136,7 +3136,7 @@ dependencies = [
 [[package]]
 name = "reth-codecs"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "bytes",
  "codecs-derive",
@@ -3146,7 +3146,7 @@ dependencies = [
 [[package]]
 name = "reth-consensus-common"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "reth-interfaces",
  "reth-primitives",
@@ -3156,7 +3156,7 @@ dependencies = [
 [[package]]
 name = "reth-db"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "bytes",
  "derive_more",
@@ -3184,7 +3184,7 @@ dependencies = [
 [[package]]
 name = "reth-discv4"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "discv5",
  "enr",
@@ -3207,7 +3207,7 @@ dependencies = [
 [[package]]
 name = "reth-ecies"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "aes 0.8.3",
  "block-padding",
@@ -3238,7 +3238,7 @@ dependencies = [
 [[package]]
 name = "reth-eth-wire"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "async-trait",
  "bytes",
@@ -3265,7 +3265,7 @@ dependencies = [
 [[package]]
 name = "reth-interfaces"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "async-trait",
  "auto_impl",
@@ -3289,7 +3289,7 @@ dependencies = [
 [[package]]
 name = "reth-libmdbx"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "bitflags 2.4.1",
  "byteorder",
@@ -3304,7 +3304,7 @@ dependencies = [
 [[package]]
 name = "reth-mdbx-sys"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "bindgen 0.68.1",
  "cc",
@@ -3314,7 +3314,7 @@ dependencies = [
 [[package]]
 name = "reth-metrics"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "metrics",
  "reth-metrics-derive",
@@ -3323,7 +3323,7 @@ dependencies = [
 [[package]]
 name = "reth-metrics-derive"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "once_cell",
  "proc-macro2",
@@ -3335,7 +3335,7 @@ dependencies = [
 [[package]]
 name = "reth-net-common"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "pin-project",
  "reth-primitives",
@@ -3345,7 +3345,7 @@ dependencies = [
 [[package]]
 name = "reth-net-nat"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "igd",
  "pin-project-lite",
@@ -3359,7 +3359,7 @@ dependencies = [
 [[package]]
 name = "reth-network-api"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "async-trait",
  "reth-discv4",
@@ -3374,7 +3374,7 @@ dependencies = [
 [[package]]
 name = "reth-primitives"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "bytes",
  "c-kzg 0.1.0 (git+https://github.com/ethereum/c-kzg-4844?rev=f5f6f863d475847876a2bd5ee252058d37c3a15d)",
@@ -3416,7 +3416,7 @@ dependencies = [
 [[package]]
 name = "reth-provider"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "auto_impl",
  "itertools 0.11.0",
@@ -3436,7 +3436,7 @@ dependencies = [
 [[package]]
 name = "reth-revm"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "reth-consensus-common",
  "reth-interfaces",
@@ -3451,7 +3451,7 @@ dependencies = [
 [[package]]
 name = "reth-revm-inspectors"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "boa_engine",
  "boa_gc",
@@ -3471,7 +3471,7 @@ dependencies = [
 [[package]]
 name = "reth-revm-primitives"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "reth-primitives",
  "revm",
@@ -3480,7 +3480,7 @@ dependencies = [
 [[package]]
 name = "reth-rlp"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "arrayvec",
  "auto_impl",
@@ -3495,7 +3495,7 @@ dependencies = [
 [[package]]
 name = "reth-rlp-derive"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3505,7 +3505,7 @@ dependencies = [
 [[package]]
 name = "reth-rpc-types"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "itertools 0.11.0",
  "jsonrpsee-types",
@@ -3519,7 +3519,7 @@ dependencies = [
 [[package]]
 name = "reth-trie"
 version = "0.1.0-alpha.10"
-source = "git+https://github.com/BigBenlau/reth_ben?rev=432f8cfd#432f8cfdb75f97290e52208a5f7d8a16dba59d9d"
+source = "git+https://github.com/BigBenlau/reth_ben?rev=1b16d804#1b16d804ef01f4ec3c25e7986381c22739c105b9"
 dependencies = [
  "derive_more",
  "hex",
@@ -3535,18 +3535,17 @@ dependencies = [
 [[package]]
 name = "revm"
 version = "3.3.0"
-source = "git+https://github.com/BigBenlau/revm_ben?rev=b1828353#b1828353e5d0d639b7cb570183342974e85c2d1c"
+source = "git+https://github.com/bluealloy/revm?rev=516f62cc#516f62ccc1c5f2a62e5fc58115213fe04c7f7a8c"
 dependencies = [
  "auto_impl",
  "revm-interpreter",
  "revm-precompile",
- "tracing",
 ]
 
 [[package]]
 name = "revm-interpreter"
 version = "1.1.2"
-source = "git+https://github.com/BigBenlau/revm_ben?rev=b1828353#b1828353e5d0d639b7cb570183342974e85c2d1c"
+source = "git+https://github.com/bluealloy/revm?rev=516f62cc#516f62ccc1c5f2a62e5fc58115213fe04c7f7a8c"
 dependencies = [
  "derive_more",
  "enumn",
@@ -3557,7 +3556,7 @@ dependencies = [
 [[package]]
 name = "revm-precompile"
 version = "2.0.3"
-source = "git+https://github.com/BigBenlau/revm_ben?rev=b1828353#b1828353e5d0d639b7cb570183342974e85c2d1c"
+source = "git+https://github.com/bluealloy/revm?rev=516f62cc#516f62ccc1c5f2a62e5fc58115213fe04c7f7a8c"
 dependencies = [
  "c-kzg 0.1.0 (git+https://github.com/ethereum/c-kzg-4844)",
  "hex",
@@ -3575,7 +3574,7 @@ dependencies = [
 [[package]]
 name = "revm-primitives"
 version = "1.1.2"
-source = "git+https://github.com/BigBenlau/revm_ben?rev=b1828353#b1828353e5d0d639b7cb570183342974e85c2d1c"
+source = "git+https://github.com/bluealloy/revm?rev=516f62cc#516f62ccc1c5f2a62e5fc58115213fe04c7f7a8c"
 dependencies = [
  "auto_impl",
  "bitflags 2.4.1",
