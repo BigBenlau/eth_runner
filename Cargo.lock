@@ -3671,6 +3671,7 @@ checksum = "e666a5496a0b2186dbcd0ff6106e29e093c15591bde62c20d3842007c6978a09"
 name = "rust_runner"
 version = "0.1.0"
 dependencies = [
+ "rand",
  "reth-db",
  "reth-primitives",
  "reth-provider",
