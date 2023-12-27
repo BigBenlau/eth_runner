@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-reth-db = { git = "https://github.com/BigBenlau/reth_ben", rev = "feb06123", package = "reth-db"}
-reth-db-provider = { git = "https://github.com/BigBenlau/reth_ben", rev = "feb06123", package = "reth-provider"}
-reth-primitives = { git = "https://github.com/BigBenlau/reth_ben", rev = "feb06123", package = "reth-primitives"}
-reth-revm = { git = "https://github.com/BigBenlau/reth_ben", rev = "feb06123", package = "reth-revm"}
+reth-db = { git = "https://github.com/BigBenlau/reth_ben", rev = "66d18f3e", package = "reth-db"}
+reth-db-provider = { git = "https://github.com/BigBenlau/reth_ben", rev = "66d18f3e", package = "reth-provider"}
+reth-primitives = { git = "https://github.com/BigBenlau/reth_ben", rev = "66d18f3e", package = "reth-primitives"}
+reth-revm = { git = "https://github.com/BigBenlau/reth_ben", rev = "66d18f3e", package = "reth-revm"}
 
 tracing = "0.1.0"
 tracing-appender = "0.2"
