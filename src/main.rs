@@ -16,14 +16,13 @@ use reth_revm::{
 use std::path::Path;
 use std::sync::Arc;
 use rand::distributions::{Distribution, Uniform};
-use tracing::info;
-use std::time::SystemTime;
+use chrono::{Local, Duration};
 
 // #[derive(Parser, Debug)]
 
 fn main() {
-    let mut cur_time = SystemTime::now();
-    println!("Start Current Time is {:?}", cur_time);
+    let start_time = Local::now();
+    println!("Start Current Time is {:?}", start_time);
 
     let string = String::from("/home/user/common/docker/volumes/eth-docker_reth-el-data/_data/db");
     let path = Path::new(&string);
@@ -59,7 +58,9 @@ fn main() {
 
         println!("new block number {:?}, round: {:?}", new_block_num, i);
     }
-    cur_time = SystemTime::now();
-    println!("End Current Time is {:?}", cur_time);
+    let end_time = Local::now();
+    println!("End Current Time is {:?}", end_time);
 
+    let diff = end_time - start_time;
+    println!("Duration Time is {:?} seconds", diff.num_seconds());
 }
