@@ -18,8 +18,12 @@ offcputime
 
 1.
 1.1 ./target/debug/rust_runner &
-1.2 (immediately after 1.1) offcputime-bpfcc -df -p `pgrep -nx rust_runner` 100 > out.stacks
+1.2 (immediately after 1.1)     offcputime-bpfcc -df -p `pgrep -nx rust_runner` > out.stacks  (-p 進程)
+                                offcputime-bpfcc -df -t `pgrep -nx rust_runner` > out.stacks  (-t 線程)
+        local: offcputime-bpfcc => /usr/share/bcc/tools/offcputime
 2. ./flamegraph.pl --color=io --title="Off-CPU Time Flame Graph" --countname=us < out.stacks > out.svg
+
+
 
 
 Memory flamegraph
@@ -36,3 +40,68 @@ Reference:
 3. https://gist.github.com/HenningTimm/ab1e5c05867e9c528b38599693d70b35
 4. https://www.aisoftcloud.cn/blog/article/1684117709501802?session=
 5. https://blog.yanjingang.com/
+
+
+
+
+
+gdb
+1. attach {PID}
+
+
+2. thread apply all bt
+show all thread record
+
+
+
+
+# How do I logically turn off (offline) cpu#6 ?
+Warning: It is not possible to disable CPU0 on Linux systems i.e do not try to take cpu0 offline. Some architectures may have some special dependency on a certain CPU. For e.g in IA64 platforms we have ability to sent platform interrupts to the OS. a.k.a Corrected Platform Error Interrupts (CPEI). In current ACPI specifications, we didn’t have a way to change the target CPU. Hence if the current ACPI version doesn’t support such re-direction, we disable that CPU by making it not-removable. In such cases you will also notice that the online file is missing under cpu0.
+Type the following command:
+# echo 0 > /sys/devices/system/cpu/cpu6/online
+# grep "processor" /proc/cpuinfo
+
+
+# How do I logically turn on (online) cpu#6 ?
+Type the following command:
+# echo 1 > /sys/devices/system/cpu/cpu6/online
+# grep "processor" /proc/cpuinfo
+
+
+
+sudo perf record -e cpu-clock -e sched:sched_stat_sleep -e sched:sched_switch -e sched:sched_process_exit -a -- sleep 10
+
+
+
+
+
+# 同時運行On-CPU和Off-CPU
+1.
+./target/debug/rust_runner > rust.log & \
+kill -STOP `pgrep -nx rust_runner`
+
+# Off-CPU
+2.1. offcputime-bpfcc -df -p `pgrep -nx rust_runner` > out.stacks  (-p 進程)
+     offcputime-bpfcc -df -t `pgrep -nx rust_runner` > out.stacks  (-t 線程)
+        local: offcputime-bpfcc => /usr/share/bcc/tools/offcputime
+     /usr/share/bcc/tools/offcputime -df -t `pgrep -nx rust_runner` 100 > out.stacks
+
+
+# On-CPU
+3. perf record -F 99 -g -p `pgrep -nx rust_runner` -o perf_on.data &
+
+# CPU Time
+4. perf stat -e task-clock -e cpu-clock -e cycles -e cpu-cycles -p `pgrep -nx rust_runner` -o stat_info.log &
+
+
+5. kill -CONT `pgrep -nx rust_runner`
+
+
+# Off-CPU
+6. ../FlameGraph/flamegraph.pl --color=io --title="Off-CPU Time Flame Graph" --countname=us < out.stacks > off_cpu.svg
+
+# On-CPU
+7. perf script -i perf_on.data &> perf.unfold
+8. ../FlameGraph/stackcollapse-perf.pl perf.unfold &> perf.folded
+9. ../FlameGraph/flamegraph.pl perf.folded > perf.svg
+10. ../FlameGraph/flamegraph.pl perf.folded --reverse --inverted > perf_rev.svg
