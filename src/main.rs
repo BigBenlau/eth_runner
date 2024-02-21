@@ -16,7 +16,7 @@ use reth_revm::{
 use std::path::Path;
 use std::sync::Arc;
 use rand::distributions::{Distribution, Uniform};
-use chrono::{Local, Duration};
+use chrono::Local;
 
 // #[derive(Parser, Debug)]
 
@@ -62,5 +62,5 @@ fn main() {
     println!("End Current Time is {:?}", end_time);
 
     let diff = end_time - start_time;
-    println!("Duration Time is {:?} seconds", diff.num_seconds());
+    println!("Duration Time is {:?} ms", diff.num_milliseconds());
 }
