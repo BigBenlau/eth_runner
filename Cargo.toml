@@ -11,6 +11,5 @@ reth-revm = { git = "https://github.com/BigBenlau/reth_ben", rev = "66d18f3e", p
 
 tracing = "0.1.0"
 tracing-appender = "0.2"
-rand = "0.8.5"
 chrono = "0.4.34"
 csv = "1.3.0"
