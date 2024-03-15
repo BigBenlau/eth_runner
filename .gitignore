@@ -1,2 +1,3 @@
-/target
+/rust_runner/target
 Cargo.lock
+go.sum
