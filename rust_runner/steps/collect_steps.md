@@ -1,42 +1,58 @@
-# Start On-CPU and Off-CPU Scanning at the same time
-1.
+# Start On-CPU and Off-CPU Scanning at the same time (check_rsut_runner.sh)
+**Run and stop function immediately**
+```
 ./target/debug/rust_runner > rust.log & \
 kill -STOP `pgrep -nx rust_runner`
+```
+**Off-CPU**
+```
+offcputime-bpfcc -df -p `pgrep -nx rust_runner` > out.stacks  (-p process) <br>
 
-## Off-CPU
-2.1. offcputime-bpfcc -df -p `pgrep -nx rust_runner` > out.stacks  (-p process)
-     offcputime-bpfcc -df -t `pgrep -nx rust_runner` > out.stacks  (-t thread)
-        local: offcputime-bpfcc => /usr/share/bcc/tools/offcputime
-     /usr/share/bcc/tools/offcputime -df -t `pgrep -nx rust_runner` 100 > out.stacks
-
-
-## On-CPU
-3. perf record -F 99 -g -p `pgrep -nx rust_runner` -o perf_on.data &
-
-# CPU Time
-4. perf stat -e task-clock -e cpu-clock -e cycles -e cpu-cycles -p `pgrep -nx rust_runner` -o stat_info.log &
+offcputime-bpfcc -df -t `pgrep -nx rust_runner` > out.stacks  (-t thread) <br>
 
 
-5. kill -CONT `pgrep -nx rust_runner`
+local: offcputime-bpfcc => /usr/share/bcc/tools/offcputime<br>
+/usr/share/bcc/tools/offcputime -df -t `pgrep -nx rust_runner` 100 > out.stacks
+```
 
+**On-CPU**
+```
+perf record -F 99 -g -p `pgrep -nx rust_runner` -o perf_on.data &
+```
+**Record on-CPU Execution Time**
+```
+perf stat -e task-clock -e cpu-clock -e cycles -e cpu-cycles -p `pgrep -nx rust_runner` -o stat_info.log &
+```
+**Continue Function**
+```
+kill -CONT `pgrep -nx rust_runner`
+```
 
-# Off-CPU
+# Off-CPU Analyse
+Run following command after finish running check_rsut_runner.sh and get off_cpu.svg and off_cpu_rev.svg
+```
 ../FlameGraph/flamegraph.pl --color=io --title="Off-CPU Time Flame Graph" --countname=us < out.stacks > off_cpu.svg
+
 ../FlameGraph/flamegraph.pl --color=io --title="Off-CPU Time Icicle Graph" --countname=us --reverse --inverted < out.stacks > off_cpu_rev.svg
-
+```
 # On-CPU
+Run following command after finish running check_rsut_runner.sh and get on_cpu.svg and on_cpu_rev.svg
+```
 perf script -i perf_on.data &> perf.unfold
+
 ../FlameGraph/stackcollapse-perf.pl perf.unfold &> perf.folded
+
 ../FlameGraph/flamegraph.pl perf.folded > perf.svg
+
 ../FlameGraph/flamegraph.pl perf.folded --reverse --inverted > perf_rev.svg
+```
 
 
 
 
 
 
-
-On-CPU flamegraph
+## On-CPU flamegraph
 
 Use root account, install perf
 1. cd rust_runner; cargo build
@@ -47,7 +63,7 @@ Use root account, install perf
 6. FlameGraph/flamegraph.pl perf.folded > perf.svg
 
 
-# Off-CPU flamegraph
+## Off-CPU flamegraph
 Use root account, install offcputime-bpfcc
 
 cd /usr/share/bcc/tools

@@ -39,7 +39,7 @@ fn main() -> Result<(), Error> {
 
     // Execute Block by block number
     let mut round_num = 0;
-    let mut gas_used_sum = 0;
+    let gas_used_sum = 0;
     let mut exec_time_sum = Duration::new(0, 0);
     let file = File::open("block_range.csv")?;
     let mut reader = Reader::from_reader(file);
@@ -47,7 +47,7 @@ fn main() -> Result<(), Error> {
     for result in reader.records() {
         let record = result?;
         let new_block_num = record[0].parse::<u64>().unwrap();
-        let gas_used = record[1].parse::<u128>().unwrap();
+        println!("Run block num: {:?}", new_block_num);
 
         let old_block_num = new_block_num - 1;
         let new_block = provider.block(BlockHashOrNumber::Number(new_block_num)).unwrap().unwrap();
@@ -62,11 +62,15 @@ fn main() -> Result<(), Error> {
         executor.execute(&new_block, U256::ZERO, None).unwrap();
 
         let stat = executor.stats();
+        let result = executor.take_output_state();
         println!("Show stats: {:?}", stat);
+        println!("Show result: {:?}", result);
+
+
         let exec_time = stat.execution_duration;
 
         round_num += 1;
-        gas_used_sum += gas_used;
+        // gas_used_sum += gas_used;
         exec_time_sum += exec_time;
         println!("new block number {:?}, round: {:?}", new_block_num, round_num);
     }

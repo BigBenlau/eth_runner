@@ -1,0 +1,25 @@
+Elapsed Time: 89.18 seconds
+
+On-CPU Time: 34.36 seconds
+Off-CPU Time: 49.37 seconds
+
+Ranking:
+On-CPU:
+1. __memmove_avx_unaligned_erms             ( 8.73%, 3.00s )
+2. keccak::keccak_p                         ( 8.43%, 2.90s )
+3. tiny_keccak::keccakf::keccakf            ( 6.45% )
+4. ruint::algorithms::div::knuth::div_nxm   ( 3.86% )
+5. sucds::darray::DArrayIndex::build        ( 2.06% )
+
+
+On-CPU Icicle:
+1. __memmove_avx_unaligned_erms             ( 8.34% )
+2. keccak::keccak_p                         ( 7.88% )
+3. tiny_keccak::keccakf::keccakf            ( 6.07% )
+4. rustsecp256k1_v0_8_1_u128_accum_mul      ( 4.67% )
+5. ruint::algorithms::div::knuth::div_nxm   ( 3.69% )
+
+
+Off-CPU Icicle:
+1. syscall_exit_to_user_mode, entry_SYSCALL_64_after_hwframe       ( 32.58s, 65.98% )
+2. irqentry_exit_to_user_mode                                      ( 16.39s, 33.19% )
