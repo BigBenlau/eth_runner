@@ -15,8 +15,15 @@ import (
 	"github.com/ethereum/go-ethereum/core/vm"
 )
 
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
 func ReadTest3() {
 	datadir := "/home/user/common/docker/volumes/cp1_eth-docker_geth-eth1-data/_data/geth/chaindata"
+	// datadir := "/home/user/data/ben/cp1_eth-docker_geth-eth1-data/_data/geth/chaindata"
 	ancient := datadir + "/ancient"
 	db, err := rawdb.Open(
 		rawdb.OpenOptions{
@@ -44,12 +51,16 @@ func ReadTest3() {
 
 	total_exec_time := time.Duration(0)
 	total_used_gas := uint64(0)
+	total_op_count := map[string]int64{}
+	total_op_time := map[string]int64{}
 
 	f, err := os.Open("block_range.csv")
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 	defer f.Close()
+
+	write_file, err := os.Create("op_time_list.csv")
+	check(err)
+	defer write_file.Close()
 
 	csvReader := csv.NewReader(f)
 	for {
@@ -62,7 +73,7 @@ func ReadTest3() {
 		}
 		headnumber, _ := strconv.ParseUint(rec[0], 10, 64)
 
-		fmt.Println(headnumber)
+		fmt.Println("Headnumber is:", headnumber)
 		parentnumber := headnumber - 1
 		hashtest := rawdb.ReadCanonicalHash(db, headnumber)
 		parenthash := rawdb.ReadCanonicalHash(db, parentnumber)
@@ -83,7 +94,7 @@ func ReadTest3() {
 		}
 
 		startTime := time.Now()
-		_, _, usedGas, _ := bc.Processor().Process(block, statedb, vm.Config{})
+		_, _, usedGas, _, op_count, op_time, op_time_list, op_gas_list := bc.Processor().Process(block, statedb, vm.Config{})
 		elapsedTime := time.Since(startTime)
 
 		trieRead := statedb.SnapshotAccountReads + statedb.AccountReads // The time spent on account read
@@ -94,6 +105,20 @@ func ReadTest3() {
 		fmt.Println("exec time", exec_time)
 		fmt.Println("usedGas", usedGas)
 
+		fmt.Println("db output op count", op_count)
+		fmt.Println("db output op time", op_time)
+
+		fmt.Fprintln(write_file, "Headnumber:", headnumber)
+		for op_code, time_value := range op_time_list {
+			fmt.Fprintln(write_file, "OpCode:", op_code)
+			fmt.Fprintln(write_file, "Time Used:", time_value)
+			fmt.Fprintln(write_file, "Gas Used:", op_gas_list[op_code])
+
+			total_op_count[op_code] += op_count[op_code]
+			total_op_time[op_code] += op_time[op_code]
+		}
+		fmt.Fprintln(write_file, "")
+
 		total_exec_time += exec_time
 		total_used_gas += usedGas
 	}
@@ -101,6 +126,12 @@ func ReadTest3() {
 	fmt.Println("Total Exec Time:", total_exec_time)
 	fmt.Println("Total Used Gas:", total_used_gas)
 
+	total_average_list := map[string]int64{}
+	for op_code, time_value := range total_op_time {
+		count := total_op_count[op_code]
+		total_average_list[op_code] = time_value / count
+	}
+	fmt.Println("Average Time Used of OpCode:", total_average_list)
 }
 
 func main() {
