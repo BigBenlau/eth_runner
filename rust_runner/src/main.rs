@@ -1,17 +1,25 @@
-use reth_db::open_db_read_only;
-use reth_db_provider::BlockReader;
-use reth_db_provider::{
-    BlockExecutor, ProviderFactory
-};
+use reth_db::{open_db_read_only, mdbx::DatabaseArguments, models::client_version::ClientVersion};
+
+use reth_provider::{BlockReaderIdExt, StateProviderFactory, BlockExecutor, ProviderFactory, providers::BlockchainProvider, TransactionVariant};
 
 use reth_primitives::{
-    MAINNET, BlockHashOrNumber, U256
+    MAINNET, BlockId, U256
 };
 
 use reth_revm::{
     database::StateProviderDatabase,
-    processor::EVMProcessor
+    processor::EVMProcessor,
+    EvmProcessorFactory
 };
+use reth_node_ethereum::EthEvmConfig;
+
+use reth_blockchain_tree::{
+    BlockchainTree, BlockchainTreeConfig, ShareableBlockchainTree, TreeExternals,
+};
+use reth_beacon_consensus::BeaconConsensus;
+
+use reth_interfaces::consensus::Consensus;
+
 
 use std::path::Path;
 use std::sync::Arc;
@@ -26,12 +34,33 @@ use csv::{Reader, Error};
 
 fn main() -> Result<(), Error> {
     // Read Database Info
-    let string = String::from("/home/user/common/docker/volumes/eth-docker_reth-el-data/_data/db");
-    let path = Path::new(&string);
-    let db = Arc::new(open_db_read_only(&path, None).unwrap());
+    // written in reth/src/commands/debug_cmd/build_block.rs (from line 147)
+
+    let db_path_str = String::from("/home/user/common/docker/volumes/eth-docker_reth-el-data/_data/db");
+    let db_path = Path::new(&db_path_str);
+    let db = Arc::new(open_db_read_only(&db_path, DatabaseArguments::new(ClientVersion::default())).unwrap());
+
+    let static_files_path_str = String::from("/home/user/common/docker/volumes/eth-docker_reth-el-data/_data/static_files");
+    let static_file_path = Path::new(&static_files_path_str).to_path_buf();
+
     let chain_spec = MAINNET.clone();
 
-    let provider = Arc::new(ProviderFactory::new(&db, chain_spec.clone()));
+    let provider_factory = ProviderFactory::new(db.clone(), chain_spec.clone(), static_file_path,).unwrap();
+
+    let consensus: Arc<dyn Consensus> = Arc::new(BeaconConsensus::new(chain_spec.clone()));
+    let evm_config = EthEvmConfig::default();
+
+    let tree_externals = TreeExternals::new(
+        provider_factory.clone(),
+        Arc::clone(&consensus),
+        EvmProcessorFactory::new(chain_spec.clone(), evm_config),
+    );
+    let tree = BlockchainTree::new(tree_externals, BlockchainTreeConfig::default(), None).unwrap();
+    let blockchain_tree = ShareableBlockchainTree::new(tree);
+
+    let blockchain_db =
+    BlockchainProvider::new(provider_factory.clone(), blockchain_tree.clone()).unwrap();
+
 
 
     let start_time = Local::now();
@@ -39,9 +68,9 @@ fn main() -> Result<(), Error> {
 
     // Execute Block by block number
     let mut round_num = 0;
-    let gas_used_sum = 0;
-    let mut exec_time_sum = Duration::new(0, 0);
-    let file = File::open("block_range.csv")?;
+    // let gas_used_sum = 0;
+    // let mut exec_time_sum = Duration::new(0, 0);
+    let file = File::open("../block_range.csv")?;
     let mut reader = Reader::from_reader(file);
 
     for result in reader.records() {
@@ -50,28 +79,27 @@ fn main() -> Result<(), Error> {
         println!("Run block num: {:?}", new_block_num);
 
         let old_block_num = new_block_num - 1;
-        let new_block = provider.block(BlockHashOrNumber::Number(new_block_num)).unwrap().unwrap();
+        let new_block = blockchain_db.block_with_senders_by_id(BlockId::from(new_block_num), TransactionVariant::WithHash).unwrap().unwrap();
 
+        let state_provider = blockchain_db.history_by_block_number(old_block_num).unwrap();
 
-        let state_provider = provider.history_by_block_number(old_block_num).unwrap();
-
-        let mut executor = EVMProcessor::new_with_db(chain_spec.clone(), StateProviderDatabase::new(state_provider));
+        let mut executor = EVMProcessor::new_with_db(chain_spec.clone(), StateProviderDatabase::new(state_provider), evm_config);
 
         // let result = executor.execute_and_verify_receipt(&new_block, U256::ZERO, None).unwrap();
 
-        executor.execute(&new_block, U256::ZERO, None).unwrap();
+        executor.execute_transactions(&new_block, U256::ZERO).unwrap();
 
-        let stat = executor.stats();
+        // let stat = executor.stats();
         let result = executor.take_output_state();
-        println!("Show stats: {:?}", stat);
+        // println!("Show stats: {:?}", stat);
         println!("Show result: {:?}", result);
 
 
-        let exec_time = stat.execution_duration;
+        // let exec_time = stat.execution_duration;
 
         round_num += 1;
         // gas_used_sum += gas_used;
-        exec_time_sum += exec_time;
+        // exec_time_sum += exec_time;
         println!("new block number {:?}, round: {:?}", new_block_num, round_num);
     }
 
@@ -82,7 +110,7 @@ fn main() -> Result<(), Error> {
     let diff = end_time - start_time;
     println!("Duration Time is {:?} ms\n", diff.num_milliseconds());
 
-    let gas_per_ms = gas_used_sum / exec_time_sum.as_millis();
-    println!("Total Gas Used is {:?} \nTotal Execution Time is {:?}\n Gas Used per millisecond is {:?}", gas_used_sum, exec_time_sum, gas_per_ms);
+    // let gas_per_ms = gas_used_sum / exec_time_sum.as_millis();
+    // println!("Total Gas Used is {:?} \nTotal Execution Time is {:?}\n Gas Used per millisecond is {:?}", gas_used_sum, exec_time_sum, gas_per_ms);
     Ok(())
 }
