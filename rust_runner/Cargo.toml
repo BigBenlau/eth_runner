@@ -4,14 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-reth-db = { git = "https://github.com/BigBenlau/reth_ben", rev = "efca7d60", package = "reth-db"}
-reth-provider = { git = "https://github.com/BigBenlau/reth_ben", rev = "efca7d60", package = "reth-provider"}
-reth-primitives = { git = "https://github.com/BigBenlau/reth_ben", rev = "efca7d60", package = "reth-primitives"}
-reth-revm = { git = "https://github.com/BigBenlau/reth_ben", rev = "efca7d60", package = "reth-revm"}
-reth-node-ethereum = { git = "https://github.com/BigBenlau/reth_ben", rev = "efca7d60", package = "reth-node-ethereum"}
-reth-blockchain-tree = { git = "https://github.com/BigBenlau/reth_ben", rev = "efca7d60", package = "reth-blockchain-tree"}
-reth-beacon-consensus =  { git = "https://github.com/BigBenlau/reth_ben", rev = "efca7d60", package = "reth-beacon-consensus"}
-reth-interfaces = { git = "https://github.com/BigBenlau/reth_ben", rev = "efca7d60", package = "reth-interfaces"}
+reth-db = { git = "https://github.com/BigBenlau/reth_ben", rev = "88c59fef", package = "reth-db"}
+reth-provider = { git = "https://github.com/BigBenlau/reth_ben", rev = "88c59fef", package = "reth-provider"}
+reth-primitives = { git = "https://github.com/BigBenlau/reth_ben", rev = "88c59fef", package = "reth-primitives"}
+reth-revm = { git = "https://github.com/BigBenlau/reth_ben", rev = "88c59fef", package = "reth-revm"}
+reth-node-ethereum = { git = "https://github.com/BigBenlau/reth_ben", rev = "88c59fef", package = "reth-node-ethereum"}
+reth-blockchain-tree = { git = "https://github.com/BigBenlau/reth_ben", rev = "88c59fef", package = "reth-blockchain-tree"}
+reth-beacon-consensus =  { git = "https://github.com/BigBenlau/reth_ben", rev = "88c59fef", package = "reth-beacon-consensus"}
+reth-interfaces = { git = "https://github.com/BigBenlau/reth_ben", rev = "88c59fef", package = "reth-interfaces"}
 
 tracing = "0.1.0"
 tracing-appender = "0.2"
