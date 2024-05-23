@@ -21,13 +21,10 @@ use reth_beacon_consensus::BeaconConsensus;
 use reth_interfaces::consensus::Consensus;
 
 
-use std::path::Path;
+use std::{path::Path, time::Instant};
 use std::sync::Arc;
-use chrono::Local;
-
-use std::time::Duration;
 use std::fs::File;
-use csv::{Reader, Error};
+use csv::Error;
 
 // #[derive(Parser, Debug)]
 
@@ -63,7 +60,7 @@ fn main() -> Result<(), Error> {
 
 
 
-    let start_time = Local::now();
+    let start_time = Instant::now();
     println!("Start Current Time is {:?}", start_time);
 
     // Execute Block by block number
@@ -71,7 +68,7 @@ fn main() -> Result<(), Error> {
     // let gas_used_sum = 0;
     // let mut exec_time_sum = Duration::new(0, 0);
     let file = File::open("../block_range.csv")?;
-    let mut reader = Reader::from_reader(file);
+    let mut reader = csv::ReaderBuilder::new().has_headers(false).from_reader(file);
 
     for result in reader.records() {
         let record = result?;
@@ -104,11 +101,11 @@ fn main() -> Result<(), Error> {
     }
 
 
-    let end_time = Local::now();
+    let end_time = Instant::now();
     println!("End Current Time is {:?}", end_time);
 
-    let diff = end_time - start_time;
-    println!("Duration Time is {:?} ms\n", diff.num_milliseconds());
+    let diff = end_time.duration_since(start_time);
+    println!("Duration Time is {:?} ms\n", diff.as_micros());
 
     // let gas_per_ms = gas_used_sum / exec_time_sum.as_millis();
     // println!("Total Gas Used is {:?} \nTotal Execution Time is {:?}\n Gas Used per millisecond is {:?}", gas_used_sum, exec_time_sum, gas_per_ms);
