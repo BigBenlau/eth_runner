@@ -105,7 +105,7 @@ fn main() -> Result<(), Error> {
     println!("End Current Time is {:?}", end_time);
 
     let diff = end_time.duration_since(start_time);
-    println!("Duration Time is {:?} ms\n", diff.as_micros());
+    println!("Duration Time is {:?} ms\n", diff.as_millis());
 
     // let gas_per_ms = gas_used_sum / exec_time_sum.as_millis();
     // println!("Total Gas Used is {:?} \nTotal Execution Time is {:?}\n Gas Used per millisecond is {:?}", gas_used_sum, exec_time_sum, gas_per_ms);
