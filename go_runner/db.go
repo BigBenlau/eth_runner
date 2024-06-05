@@ -54,7 +54,7 @@ func ReadTest3() {
 	total_op_count := map[string]int64{}
 	total_op_time := map[string]int64{}
 
-	f, err := os.Open("block_range.csv")
+	f, err := os.Open("../block_range.csv")
 	check(err)
 	defer f.Close()
 
@@ -122,16 +122,21 @@ func ReadTest3() {
 		total_exec_time += exec_time
 		total_used_gas += usedGas
 	}
+	// loop finish
 
 	fmt.Println("Total Exec Time:", total_exec_time)
 	fmt.Println("Total Used Gas:", total_used_gas)
 
-	total_average_list := map[string]int64{}
+	write_file2, err2 := os.Create("opcode_average_time.csv")
+	check(err2)
+	defer write_file2.Close()
+
 	for op_code, time_value := range total_op_time {
 		count := total_op_count[op_code]
-		total_average_list[op_code] = time_value / count
+		avg_time := time_value / count
+
+		fmt.Fprintln(write_file2, op_code, avg_time, count)
 	}
-	fmt.Println("Average Time Used of OpCode:", total_average_list)
 }
 
 func main() {
