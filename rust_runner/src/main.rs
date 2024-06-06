@@ -74,7 +74,6 @@ fn main() -> Result<(), Error> {
     for result in reader.records() {
         let record = result?;
         let new_block_num = record[0].parse::<u64>().unwrap();
-        println!("Run block num: {:?}", new_block_num);
 
         let old_block_num = new_block_num - 1;
         let new_block = blockchain_db.block_with_senders_by_id(BlockId::from(new_block_num), TransactionVariant::WithHash).unwrap().unwrap();
