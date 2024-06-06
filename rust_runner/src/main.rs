@@ -21,6 +21,7 @@ use reth_beacon_consensus::BeaconConsensus;
 use reth_interfaces::consensus::Consensus;
 
 
+use std::time::Duration;
 use std::{path::Path, time::Instant};
 use std::sync::Arc;
 use std::fs::File;
@@ -60,8 +61,8 @@ fn main() -> Result<(), Error> {
 
 
 
+    let mut total_exec_diff = Duration::ZERO;
     let start_time = Instant::now();
-    println!("Start Current Time is {:?}", start_time);
 
     // Execute Block by block number
     let mut round_num = 0;
@@ -84,12 +85,17 @@ fn main() -> Result<(), Error> {
 
         // let result = executor.execute_and_verify_receipt(&new_block, U256::ZERO, None).unwrap();
 
+        let exec_start_time = Instant::now();
+
         executor.execute_transactions(&new_block, U256::ZERO).unwrap();
 
+        let exec_end_time = Instant::now();
+        let exec_diff = exec_end_time.duration_since(exec_start_time);
+        total_exec_diff += exec_diff;
+
         // let stat = executor.stats();
-        let result = executor.take_output_state();
-        // println!("Show stats: {:?}", stat);
-        println!("Show result: {:?}", result);
+        // let result = executor.take_output_state();
+        // println!("Show result: {:?}", result);
 
 
         // let exec_time = stat.execution_duration;
@@ -102,10 +108,11 @@ fn main() -> Result<(), Error> {
 
 
     let end_time = Instant::now();
-    println!("End Current Time is {:?}", end_time);
 
     let diff = end_time.duration_since(start_time);
-    println!("Duration Time is {:?} s\n", diff.as_secs_f64());
+    println!("Overall Duration Time is {:?} s\n", diff.as_secs_f64());
+    println!("Total Execution Time is {:?} s\n", total_exec_diff.as_secs_f64());
+
 
     // let gas_per_ms = gas_used_sum / exec_time_sum.as_millis();
     // println!("Total Gas Used is {:?} \nTotal Execution Time is {:?}\n Gas Used per millisecond is {:?}", gas_used_sum, exec_time_sum, gas_per_ms);
