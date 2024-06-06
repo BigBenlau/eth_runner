@@ -25,8 +25,10 @@ func check(e error) {
 }
 
 func print_opcode_list(op_time_list map[string][]int64) {
-	for op_code, time_value := range op_time_list {
-		fmt.Println("Opcode name is", op_code, "Run time as nanos: ", time_value)
+	for op_code, time_value_list := range op_time_list {
+		for time_value := range time_value_list {
+			fmt.Println("Opcode name is", op_code, "Run time as nanos: ", time_value)
+		}
 	}
 	wg.Done()
 }
