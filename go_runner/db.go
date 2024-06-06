@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum/consensus/ethash"
@@ -15,10 +16,19 @@ import (
 	"github.com/ethereum/go-ethereum/core/vm"
 )
 
+var wg sync.WaitGroup
+
 func check(e error) {
 	if e != nil {
 		panic(e)
 	}
+}
+
+func print_opcode_list(op_time_list map[string][]int64) {
+	for op_code, time_value := range op_time_list {
+		fmt.Println("Opcode name is", op_code, "Run time as nanos: ", time_value)
+	}
+	wg.Done()
 }
 
 func ReadTest3() {
@@ -94,30 +104,33 @@ func ReadTest3() {
 		}
 
 		startTime := time.Now()
-		_, _, usedGas, _, op_count, op_time, op_time_list, op_gas_list := bc.Processor().Process(block, statedb, vm.Config{})
+		// _, _, usedGas, _, op_count, op_time, op_time_list, op_gas_list := bc.Processor().Process(block, statedb, vm.Config{})
+		_, _, usedGas, _, _, _, op_time_list, _ := bc.Processor().Process(block, statedb, vm.Config{})
 		elapsedTime := time.Since(startTime)
 
 		trieRead := statedb.SnapshotAccountReads + statedb.AccountReads // The time spent on account read
 		trieRead += statedb.SnapshotStorageReads + statedb.StorageReads // The time spent on storage read
 		exec_time := elapsedTime - trieRead                             // The time spent on EVM processing
 
-		fmt.Println("elapsedTime", elapsedTime)
-		fmt.Println("exec time", exec_time)
-		fmt.Println("usedGas", usedGas)
+		wg.Add(1)
+		go print_opcode_list(op_time_list)
 
-		fmt.Println("db output op count", op_count)
-		fmt.Println("db output op time", op_time)
+		// fmt.Println("elapsedTime", elapsedTime)
+		// fmt.Println("exec time", exec_time)
+		// fmt.Println("usedGas", usedGas)
 
-		fmt.Fprintln(write_file, "Headnumber:", headnumber)
-		for op_code, time_value := range op_time_list {
-			fmt.Fprintln(write_file, "OpCode:", op_code)
-			fmt.Fprintln(write_file, "Time Used:", time_value)
-			fmt.Fprintln(write_file, "Gas Used:", op_gas_list[op_code])
+		// fmt.Println("db output op count", op_count)
+		// fmt.Println("db output op time", op_time)
 
-			total_op_count[op_code] += op_count[op_code]
-			total_op_time[op_code] += op_time[op_code]
-		}
-		fmt.Fprintln(write_file, "")
+		// fmt.Fprintln(write_file, "Headnumber:", headnumber)
+		// for op_code, time_value := range op_time_list {
+		// 	fmt.Fprintln(write_file, "OpCode:", op_code)
+		// 	fmt.Fprintln(write_file, "Time Used:", time_value)
+		// 	fmt.Fprintln(write_file, "Gas Used:", op_gas_list[op_code])
+		// 	total_op_count[op_code] += op_count[op_code]
+		// 	total_op_time[op_code] += op_time[op_code]
+		// }
+		// fmt.Fprintln(write_file, "")
 
 		total_exec_time += exec_time
 		total_used_gas += usedGas
@@ -137,6 +150,8 @@ func ReadTest3() {
 
 		fmt.Fprintln(write_file2, op_code, avg_time, count)
 	}
+	fmt.Println("Wait until print_opcode_list finish.")
+	wg.Wait()
 }
 
 func main() {
