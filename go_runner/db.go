@@ -61,6 +61,7 @@ func ReadTest3() {
 	// headnumber_adr := rawdb.ReadHeaderNumber(db, headhash)
 	// headnumber := *headnumber_adr
 
+	total_exec_elapsedTime := time.Duration(0)
 	total_exec_time := time.Duration(0)
 	total_used_gas := uint64(0)
 	total_op_count := map[string]int64{}
@@ -75,6 +76,8 @@ func ReadTest3() {
 	defer write_file.Close()
 
 	csvReader := csv.NewReader(f)
+
+	run_start_time := time.Now()
 	for {
 		rec, err := csvReader.Read()
 		if err == io.EOF || rec[0] == "" {
@@ -105,17 +108,17 @@ func ReadTest3() {
 			log.Fatal("Failed to retrieve the statedb of parentRoot")
 		}
 
-		startTime := time.Now()
+		exec_startTime := time.Now()
 		// _, _, usedGas, _, op_count, op_time, op_time_list, op_gas_list := bc.Processor().Process(block, statedb, vm.Config{})
-		_, _, usedGas, _, _, _, op_time_list, _ := bc.Processor().Process(block, statedb, vm.Config{})
-		elapsedTime := time.Since(startTime)
+		_, _, usedGas, _, _, _, _, _ := bc.Processor().Process(block, statedb, vm.Config{})
+		exec_elapsedTime := time.Since(exec_startTime)
 
 		trieRead := statedb.SnapshotAccountReads + statedb.AccountReads // The time spent on account read
 		trieRead += statedb.SnapshotStorageReads + statedb.StorageReads // The time spent on storage read
-		exec_time := elapsedTime - trieRead                             // The time spent on EVM processing
+		exec_time := exec_elapsedTime - trieRead                        // The time spent on EVM processing
 
-		wg.Add(1)
-		go print_opcode_list(op_time_list)
+		// wg.Add(1)
+		// go print_opcode_list(op_time_list)
 
 		// fmt.Println("elapsedTime", elapsedTime)
 		// fmt.Println("exec time", exec_time)
@@ -133,12 +136,16 @@ func ReadTest3() {
 		// 	total_op_time[op_code] += op_time[op_code]
 		// }
 		// fmt.Fprintln(write_file, "")
-
+		total_exec_elapsedTime += exec_elapsedTime
 		total_exec_time += exec_time
 		total_used_gas += usedGas
 	}
 	// loop finish
 
+	run_elapsedTime := time.Since(run_start_time)
+
+	fmt.Println("Total Run Loop Time:", run_elapsedTime)
+	fmt.Println("Total Elapsed Time:", total_exec_elapsedTime)
 	fmt.Println("Total Exec Time:", total_exec_time)
 	fmt.Println("Total Used Gas:", total_used_gas)
 
