@@ -56,6 +56,8 @@ func ReadTest3() {
 	total_used_gas := uint64(0)
 	parallel.Start_channel()
 
+	round_count := uint64(0)
+
 	f, err := os.Open("../block_range.csv")
 	check(err)
 	defer f.Close()
@@ -73,7 +75,9 @@ func ReadTest3() {
 		}
 		headnumber, _ := strconv.ParseUint(rec[0], 10, 64)
 
-		fmt.Println("Headnumber is:", headnumber)
+		fmt.Println("Headnumber is:", headnumber, "round idx is: ", round_count)
+		round_count += 1
+
 		parentnumber := headnumber - 1
 		hashtest := rawdb.ReadCanonicalHash(db, headnumber)
 		parenthash := rawdb.ReadCanonicalHash(db, parentnumber)
