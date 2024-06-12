@@ -62,16 +62,10 @@ func ReadTest3() {
 	total_exec_elapsedTime := time.Duration(0)
 	total_exec_time := time.Duration(0)
 	total_used_gas := uint64(0)
-	total_op_count := map[string]int64{}
-	total_op_time := map[string]int64{}
 
 	f, err := os.Open("../block_range.csv")
 	check(err)
 	defer f.Close()
-
-	write_file, err := os.Create("op_time_list.csv")
-	check(err)
-	defer write_file.Close()
 
 	csvReader := csv.NewReader(f)
 
@@ -123,24 +117,14 @@ func ReadTest3() {
 
 	run_elapsedTime := time.Since(run_start_time)
 
+	// print records
+	parallel.Print_total_op_count_and_time()
+
 	fmt.Println("Total Run Loop Time:", run_elapsedTime)
 	fmt.Println("Total Elapsed Time:", total_exec_elapsedTime)
 	fmt.Println("Total Exec Time:", total_exec_time)
 	fmt.Println("Total Used Gas:", total_used_gas)
 
-	parallel.Print_total_op_count_and_time()
-
-	write_file2, err2 := os.Create("opcode_average_time.csv")
-	check(err2)
-	defer write_file2.Close()
-
-	for op_code, time_value := range total_op_time {
-		count := total_op_count[op_code]
-		avg_time := time_value / count
-
-		fmt.Fprintln(write_file2, op_code, avg_time, count)
-	}
-	fmt.Println("Wait until print_opcode_list finish.")
 }
 
 func main() {
