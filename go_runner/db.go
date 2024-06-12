@@ -14,6 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/parallel"
 )
 
 var wg sync.WaitGroup
@@ -24,7 +25,7 @@ func check(e error) {
 	}
 }
 
-func print_opcode_list(op_time_list map[string][]int64) {
+func print_opcode_list(op_time_list map[string]map[string]int64) {
 	for op_code, time_value_list := range op_time_list {
 		for _, time_value := range time_value_list {
 			fmt.Println("Opcode name is", op_code, "Run time as nanos: ", time_value)
@@ -148,6 +149,8 @@ func ReadTest3() {
 	fmt.Println("Total Elapsed Time:", total_exec_elapsedTime)
 	fmt.Println("Total Exec Time:", total_exec_time)
 	fmt.Println("Total Used Gas:", total_used_gas)
+
+	print_opcode_list(parallel.Total_op_count_and_time)
 
 	write_file2, err2 := os.Create("opcode_average_time.csv")
 	check(err2)
