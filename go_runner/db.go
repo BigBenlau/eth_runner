@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum/consensus/ethash"
@@ -16,8 +15,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/parallel"
 )
-
-var wg sync.WaitGroup
 
 func check(e error) {
 	if e != nil {
@@ -31,7 +28,6 @@ func print_opcode_list(op_time_list map[string]map[string]int64) {
 			fmt.Println("Opcode name is", op_code, "Run time as nanos: ", time_value)
 		}
 	}
-	// wg.Done()
 }
 
 func ReadTest3() {
@@ -50,6 +46,7 @@ func ReadTest3() {
 	}
 
 	fmt.Println("start get bc")
+
 	// 用數據庫中的數據重新建數據鏈
 	// // datadir: cp_eth-docker
 	// bc, _ := core.NewBlockChain(db, core.DefaultCacheConfigWithScheme(rawdb.PathScheme), nil, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
@@ -118,25 +115,6 @@ func ReadTest3() {
 		trieRead += statedb.SnapshotStorageReads + statedb.StorageReads // The time spent on storage read
 		exec_time := exec_elapsedTime - trieRead                        // The time spent on EVM processing
 
-		// wg.Add(1)
-		// go print_opcode_list(op_time_list)
-
-		// fmt.Println("elapsedTime", elapsedTime)
-		// fmt.Println("exec time", exec_time)
-		// fmt.Println("usedGas", usedGas)
-
-		// fmt.Println("db output op count", op_count)
-		// fmt.Println("db output op time", op_time)
-
-		// fmt.Fprintln(write_file, "Headnumber:", headnumber)
-		// for op_code, time_value := range op_time_list {
-		// 	fmt.Fprintln(write_file, "OpCode:", op_code)
-		// 	fmt.Fprintln(write_file, "Time Used:", time_value)
-		// 	fmt.Fprintln(write_file, "Gas Used:", op_gas_list[op_code])
-		// 	total_op_count[op_code] += op_count[op_code]
-		// 	total_op_time[op_code] += op_time[op_code]
-		// }
-		// fmt.Fprintln(write_file, "")
 		total_exec_elapsedTime += exec_elapsedTime
 		total_exec_time += exec_time
 		total_used_gas += usedGas
@@ -150,7 +128,7 @@ func ReadTest3() {
 	fmt.Println("Total Exec Time:", total_exec_time)
 	fmt.Println("Total Used Gas:", total_used_gas)
 
-	print_opcode_list(parallel.Total_op_count_and_time)
+	parallel.Print_total_op_count_and_time()
 
 	write_file2, err2 := os.Create("opcode_average_time.csv")
 	check(err2)
@@ -163,7 +141,6 @@ func ReadTest3() {
 		fmt.Fprintln(write_file2, op_code, avg_time, count)
 	}
 	fmt.Println("Wait until print_opcode_list finish.")
-	wg.Wait()
 }
 
 func main() {
