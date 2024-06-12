@@ -29,6 +29,7 @@ use std::{path::Path, time::Instant};
 use std::sync::Arc;
 use std::fs::File;
 use csv::Error;
+use std::thread;
 
 // #[derive(Parser, Debug)]
 
@@ -64,7 +65,7 @@ fn main() -> Result<(), Error> {
 
 
     // 创建一个通道
-    let log_handle = start_channel();
+    let _ = start_channel();
 
     let mut total_exec_diff = Duration::ZERO;
     let start_time = Instant::now();
@@ -112,6 +113,8 @@ fn main() -> Result<(), Error> {
 
     let end_time = Instant::now();
 
+    // 確保channel能完成所有工作
+    thread::sleep(Duration::from_secs(3));
 
     // 打印每個opcode運行總時間
     print_records();
@@ -120,8 +123,6 @@ fn main() -> Result<(), Error> {
     println!("Overall Duration Time is {:?} s", diff.as_secs_f64());
     println!("Total Execution Time is {:?} s\n", total_exec_diff.as_secs_f64());
 
-    // 确保日志线程在主线程结束前完成
-    log_handle.join().unwrap();
 
     // let gas_per_ms = gas_used_sum / exec_time_sum.as_millis();
     // println!("Total Gas Used is {:?} \nTotal Execution Time is {:?}\n Gas Used per millisecond is {:?}", gas_used_sum, exec_time_sum, gas_per_ms);
