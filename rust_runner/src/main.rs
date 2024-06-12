@@ -20,6 +20,9 @@ use reth_beacon_consensus::BeaconConsensus;
 
 use reth_interfaces::consensus::Consensus;
 
+use revm_interpreter::{
+    start_channel, print_records
+};
 
 use std::time::Duration;
 use std::{path::Path, time::Instant};
@@ -60,6 +63,8 @@ fn main() -> Result<(), Error> {
     BlockchainProvider::new(provider_factory.clone(), blockchain_tree.clone()).unwrap();
 
 
+    // 创建一个通道
+    let log_handle = start_channel();
 
     let mut total_exec_diff = Duration::ZERO;
     let start_time = Instant::now();
@@ -67,7 +72,8 @@ fn main() -> Result<(), Error> {
     // Execute Block by block number
     let mut round_num = 0;
     // let gas_used_sum = 0;
-    // let mut exec_time_sum = Duration::new(0, 0);
+
+
     let file = File::open("../block_range.csv")?;
     let mut reader = csv::ReaderBuilder::new().has_headers(false).from_reader(file);
 
@@ -97,11 +103,9 @@ fn main() -> Result<(), Error> {
         // println!("Show result: {:?}", result);
 
 
-        // let exec_time = stat.execution_duration;
-
         round_num += 1;
         // gas_used_sum += gas_used;
-        // exec_time_sum += exec_time;
+
         println!("new block number {:?}, round: {:?}", new_block_num, round_num);
     }
 
@@ -109,9 +113,14 @@ fn main() -> Result<(), Error> {
     let end_time = Instant::now();
 
     let diff = end_time.duration_since(start_time);
-    println!("Overall Duration Time is {:?} s\n", diff.as_secs_f64());
+    println!("Overall Duration Time is {:?} s", diff.as_secs_f64());
     println!("Total Execution Time is {:?} s\n", total_exec_diff.as_secs_f64());
 
+    // 打印每個opcode運行總時間
+    print_records();
+
+    // 确保日志线程在主线程结束前完成
+    log_handle.join().unwrap();
 
     // let gas_per_ms = gas_used_sum / exec_time_sum.as_millis();
     // println!("Total Gas Used is {:?} \nTotal Execution Time is {:?}\n Gas Used per millisecond is {:?}", gas_used_sum, exec_time_sum, gas_per_ms);
