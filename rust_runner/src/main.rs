@@ -112,12 +112,13 @@ fn main() -> Result<(), Error> {
 
     let end_time = Instant::now();
 
-    let diff = end_time.duration_since(start_time);
-    println!("Overall Duration Time is {:?} s", diff.as_secs_f64());
-    println!("Total Execution Time is {:?} s\n", total_exec_diff.as_secs_f64());
 
     // 打印每個opcode運行總時間
     print_records();
+
+    let diff = end_time.duration_since(start_time);
+    println!("Overall Duration Time is {:?} s", diff.as_secs_f64());
+    println!("Total Execution Time is {:?} s\n", total_exec_diff.as_secs_f64());
 
     // 确保日志线程在主线程结束前完成
     log_handle.join().unwrap();
