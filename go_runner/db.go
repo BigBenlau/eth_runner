@@ -22,14 +22,6 @@ func check(e error) {
 	}
 }
 
-func print_opcode_list(op_time_list map[string]map[string]int64) {
-	for op_code, time_value_list := range op_time_list {
-		for _, time_value := range time_value_list {
-			fmt.Println("Opcode name is", op_code, "Run time as nanos: ", time_value)
-		}
-	}
-}
-
 func ReadTest3() {
 	datadir := "/home/user/common/docker/volumes/cp1_eth-docker_geth-eth1-data/_data/geth/chaindata"
 	// datadir := "/home/user/data/ben/cp1_eth-docker_geth-eth1-data/_data/geth/chaindata"
