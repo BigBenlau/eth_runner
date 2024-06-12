@@ -31,7 +31,7 @@ func print_opcode_list(op_time_list map[string]map[string]int64) {
 			fmt.Println("Opcode name is", op_code, "Run time as nanos: ", time_value)
 		}
 	}
-	wg.Done()
+	// wg.Done()
 }
 
 func ReadTest3() {
