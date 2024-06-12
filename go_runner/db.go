@@ -54,6 +54,7 @@ func ReadTest3() {
 	total_exec_elapsedTime := time.Duration(0)
 	total_exec_time := time.Duration(0)
 	total_used_gas := uint64(0)
+	parallel.Start_channel()
 
 	f, err := os.Open("../block_range.csv")
 	check(err)
