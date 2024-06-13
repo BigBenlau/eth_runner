@@ -1,8 +1,11 @@
 import re
+import sys
+import csv
 
-read_filename = "log_rust_runner.log"
+basename = sys.argv[1]
+read_filename = "%s.log" % basename
 read_file = open(read_filename)
-output_filename = "opcode_average_time.txt"
+output_filename = "%s_update.csv" % basename
 output_file = open(output_filename, "w")
 
 count_dict = {}
@@ -13,22 +16,22 @@ while True:
     line = read_file.readline()
     if not line:
         break
-    if re.search("Opcode name is", line) != None:
-        opcode_line, time_line = line.split(". ")
-        opcode = opcode_line.replace("Opcode name is ", "")[1:-1]
-        dur_time = int(time_line.replace("Run time as nanos: ", "")[:-1])
+    if re.search("Opcode name is", line) != None and re.search("Total Count is:", line) != None:
+        opcode_line, time_line, count_line = line.split(". ")
+        opcode = opcode_line.replace("Opcode name is: ", "").replace("\"", "")
+        total_dur_time = int(time_line.replace("Run time as nanos: ", "").replace(" ", ""))
+        total_count = int(count_line.replace("Total Count is: ", "").replace(" ", "").replace("\n", ""))
 
-        if count_dict.get(opcode, "Not") == "Not":
-            count_dict[opcode] = {
-                "count": 0,
-                "total_time": 0
-            }
+        if count_dict.get(opcode, "Not") != "Not":
+            raise ValueError
+        else:
+            count_dict[opcode] = {}
 
-        count_dict[opcode]["count"] += 1
-        count_dict[opcode]["total_time"] += dur_time
-        total_opcode_time += dur_time
+        count_dict[opcode]["count"] = total_count
+        count_dict[opcode]["total_time"] = total_dur_time
+        total_opcode_time += total_dur_time
         if opcode not in ["DELEGATECALL", "CALL", "STATICCALL"]:
-            total_opcode_time_except_call += dur_time
+            total_opcode_time_except_call += total_dur_time
 
 print("scan file finished!!")
 print("total opcode time used: %s" % round(total_opcode_time / 10**9, 4))
@@ -40,6 +43,7 @@ for key in count_dict:
 
 sorted_list = sorted(count_dict.items(), key=lambda item:item[1]["avg_time"], reverse=True)
 
-output_file.write("Opcode\tAverage Time\tCount\n")
+output_writer = csv.writer(output_file)
+output_writer.writerow(["Opcode", "Average Time", "Count"])
 for item in sorted_list:
-    output_file.write("%s\t%s\t%s\n" % (item[0], item[1]["avg_time"], item[1]["count"]))
+    output_writer.writerow([item[0], item[1]["avg_time"], item[1]["count"]])
