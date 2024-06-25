@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/parallel"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/holiman/uint256"
 )
@@ -44,7 +45,7 @@ func run_contract() {
 	check(err)
 
 	zeroValue := big.NewInt(0)
-	gasLimit := ^uint64(0)
+	gasLimit := ^uint64(30000000)
 
 	tx := types.NewTx(&types.AccessListTx{
 		ChainID:  big.NewInt(1),
@@ -56,8 +57,7 @@ func run_contract() {
 		Data:     contractCodeBytes,
 	})
 
-	var signer types.Signer
-	signer = types.NewEIP2930Signer(big.NewInt(1))
+	signer := types.NewEIP2930Signer(big.NewInt(1))
 	signer.Sender(tx)
 	createMsg, _ := core.TransactionToMessage(tx, signer, zeroValue)
 
@@ -97,9 +97,11 @@ func run_contract() {
 	_, _, err, _, _, _, _ = evm.Call(vm.AccountRef(callerAddress), *msg.To, msg.Data, msg.GasLimit, new(uint256.Int))
 	timeTaken := time.Since(start)
 
-	fmt.Println("used time:", float64(timeTaken.Nanoseconds()))
+	fmt.Println("used time (nanos):", float64(timeTaken.Nanoseconds()))
 
 	check(err)
 
 	statedb.RevertToSnapshot(snapshot)
+
+	parallel.Print_total_op_count_and_time()
 }
