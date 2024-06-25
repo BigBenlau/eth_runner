@@ -68,7 +68,6 @@ func run_contract() {
 	txContext := core.NewEVMTxContext(createMsg)
 	evm := vm.NewEVM(blockContext, txContext, statedb, config, vm.Config{})
 
-	fmt.Println("chainconfig:  ", evm.ChainConfig())
 	_, contractAddress, _, err := evm.Create(vm.AccountRef(callerAddress), contractCodeBytes, gasLimit, new(uint256.Int))
 	check(err)
 
@@ -93,15 +92,17 @@ func run_contract() {
 	statedb.AddAddressToAccessList(msg.From)
 	statedb.AddAddressToAccessList(*msg.To)
 
+	parallel.Start_channel()
+
 	start := time.Now()
 	_, _, err, _, _, _, _ = evm.Call(vm.AccountRef(callerAddress), *msg.To, msg.Data, msg.GasLimit, new(uint256.Int))
 	timeTaken := time.Since(start)
 
 	fmt.Println("used time (nanos):", float64(timeTaken.Nanoseconds()))
 
+	parallel.Print_total_op_count_and_time()
+
 	check(err)
 
 	statedb.RevertToSnapshot(snapshot)
-
-	parallel.Print_total_op_count_and_time()
 }
