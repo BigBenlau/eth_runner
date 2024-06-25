@@ -97,7 +97,7 @@ func run_contract() {
 	_, _, err, _, _, _, _ = evm.Call(vm.AccountRef(callerAddress), *msg.To, msg.Data, msg.GasLimit, new(uint256.Int))
 	timeTaken := time.Since(start)
 
-	fmt.Println(float64(timeTaken.Microseconds()) / 1e3)
+	fmt.Println("used time:", float64(timeTaken.Nanoseconds()))
 
 	check(err)
 
