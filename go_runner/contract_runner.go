@@ -23,7 +23,7 @@ func run_contract() {
 	check(err)
 
 	contractCodeBytes := common.Hex2Bytes(string(contractCodeHex))
-	calldataBytes := common.Hex2Bytes("")
+	calldataBytes := common.Hex2Bytes("30627b7c")
 
 	zeroAddress := common.BytesToAddress(common.FromHex("0x0000000000000000000000000000000000000000"))
 	callerAddress := common.BytesToAddress(common.FromHex("0x1000000000000000000000000000000000000001"))
