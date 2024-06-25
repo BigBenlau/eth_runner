@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 	"math/big"
-	"os"
+
+	// "os"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -18,9 +19,10 @@ import (
 )
 
 func run_contract() {
-	contractCodePath := "../keccak.sol"
-	contractCodeHex, err := os.ReadFile(contractCodePath)
-	check(err)
+	// contractCodePath := "../keccak.sol"
+	// contractCodeHex, err := os.ReadFile(contractCodePath)
+	contractCodeHex := "6080604052348015600e575f80fd5b50609780601a5f395ff3fe6080604052348015600e575f80fd5b50600436106026575f3560e01c806330627b7c14602a575b5f80fd5b60306032565b005b5f5b614e20811015605e5760408051602081018390520160408051601f19818403019052526001016034565b5056fea26469706673582212206062ba0a94566c37ab2e40be21c7743d6110409c36751a1c0666984ddb1172e564736f6c634300081a0033"
+	// check(err)
 
 	contractCodeBytes := common.Hex2Bytes(string(contractCodeHex))
 	calldataBytes := common.Hex2Bytes("30627b7c")
@@ -29,15 +31,15 @@ func run_contract() {
 	callerAddress := common.BytesToAddress(common.FromHex("0x1000000000000000000000000000000000000001"))
 
 	config := params.MainnetChainConfig
-	rules := config.Rules(config.MergeNetsplitBlock, true, 1681338458)
+	rules := config.Rules(config.LondonBlock, true, 1719334349)
 	defaultGenesis := core.DefaultGenesisBlock()
 	genesis := &core.Genesis{
 		Config:     config,
 		Coinbase:   defaultGenesis.Coinbase,
 		Difficulty: defaultGenesis.Difficulty,
 		GasLimit:   defaultGenesis.GasLimit,
-		Number:     1681338457,
-		Timestamp:  1681338458,
+		Number:     1719334349,
+		Timestamp:  1719334350,
 		Alloc:      defaultGenesis.Alloc,
 	}
 
@@ -95,7 +97,7 @@ func run_contract() {
 	parallel.Start_channel()
 
 	start := time.Now()
-	_, _, err, _, _, _, _ = evm.Call(vm.AccountRef(callerAddress), *msg.To, msg.Data, msg.GasLimit, new(uint256.Int))
+	_, _, err, _, _, _, _ = evm.Call(vm.AccountRef(callerAddress), *msg.To, msg.Data, msg.GasLimit, msg.Value)
 	timeTaken := time.Since(start)
 
 	fmt.Println("used time (nanos):", float64(timeTaken.Nanoseconds()))
