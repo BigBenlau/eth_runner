@@ -16,14 +16,8 @@ import (
 	"github.com/holiman/uint256"
 )
 
-var (
-	contractCodePath string
-	calldata         string
-	numRuns          int
-)
-
 func run_contract() {
-	contractCodePath = "../keccak.sol"
+	contractCodePath := "../keccak.sol"
 	contractCodeHex, err := os.ReadFile(contractCodePath)
 	check(err)
 
@@ -95,19 +89,17 @@ func run_contract() {
 	msg, _ := core.TransactionToMessage(tx1, signer, zeroValue)
 	//msg := types.NewMessage(callerAddress, &contractAddress, 1, zeroValue, gasLimit, zeroValue, zeroValue, zeroValue, calldataBytes, types.AccessList{}, false)
 
-	for i := 0; i < numRuns; i++ {
-		snapshot := statedb.Snapshot()
-		statedb.AddAddressToAccessList(msg.From)
-		statedb.AddAddressToAccessList(*msg.To)
+	snapshot := statedb.Snapshot()
+	statedb.AddAddressToAccessList(msg.From)
+	statedb.AddAddressToAccessList(*msg.To)
 
-		start := time.Now()
-		_, _, err, _, _, _, _ := evm.Call(vm.AccountRef(callerAddress), *msg.To, msg.Data, msg.GasLimit, new(uint256.Int))
-		timeTaken := time.Since(start)
+	start := time.Now()
+	_, _, err, _, _, _, _ = evm.Call(vm.AccountRef(callerAddress), *msg.To, msg.Data, msg.GasLimit, new(uint256.Int))
+	timeTaken := time.Since(start)
 
-		fmt.Println(float64(timeTaken.Microseconds()) / 1e3)
+	fmt.Println(float64(timeTaken.Microseconds()) / 1e3)
 
-		check(err)
+	check(err)
 
-		statedb.RevertToSnapshot(snapshot)
-	}
+	statedb.RevertToSnapshot(snapshot)
 }
