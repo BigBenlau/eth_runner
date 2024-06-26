@@ -10,7 +10,7 @@ import csv
 basename = sys.argv[1]
 read_filename = "%s.log" % basename
 read_file = open(read_filename)
-output_filename = "%s_update.txt" % basename
+output_filename = "%s_update.csv" % basename
 output_file = open(output_filename, "w")
 
 count_dict = {}
