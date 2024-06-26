@@ -15,15 +15,25 @@ const CONTRACT_ADDRESS: B256 = B256::new([1; 32]);
 
 pub fn run_contract_code() {
     let mut contract_str = String::from("");
-    for i in 0..256 {
-        let hex_str = format!("{:x}", i);
-        let mut left_str = String::from("");
-        if hex_str.len() == 1 {
-            left_str = String::from("0");
-        }
-        let bytecode_each = String::from("60") + &left_str + &hex_str + &String::from("600053600160002050");
+
+    // // hex_str from 00 to ff
+    // for i in 0..256 {
+    //     let hex_str = format!("{:x}", i);
+    //     let mut left_str = String::from("");
+    //     if hex_str.len() == 1 {
+    //         left_str = String::from("0");
+    //     }
+    //     let bytecode_each = String::from("60") + &left_str + &hex_str + &String::from("600053600160002050");
+    //     contract_str.push_str(&bytecode_each);
+    // }
+
+    // hex_str all 00
+    for _ in 0..256 {
+        let hex_str = String::from("00");
+        let bytecode_each = String::from("60") + &hex_str + &String::from("600053600160002050");
         contract_str.push_str(&bytecode_each);
     }
+    println!("show contract_str: {:?}", contract_str);
 
     let contract_code: Bytes = Bytes::from_str(&contract_str).unwrap();
 
