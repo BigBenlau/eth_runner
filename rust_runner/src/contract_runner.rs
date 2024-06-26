@@ -1,4 +1,4 @@
-use std::{str::FromStr, thread, time::{Duration, Instant}, fmt::LowerHex};
+use std::{str::FromStr, thread, time::{Duration, Instant}};
 
 use reth_primitives::{Bytes, B256};
 use revm_interpreter::{
@@ -14,21 +14,21 @@ extern crate alloc;
 const CONTRACT_ADDRESS: B256 = B256::new([1; 32]);
 
 pub fn run_contract_code() {
-    let mut contract_str = "";
+    let mut contract_str = String::from("");
     for i in 0..256 {
-        let mut hex_str = format!("{:x}", i);
+        let hex_str = format!("{:x}", i);
         let mut left_str = String::from("");
         if hex_str.len() == 1 {
             left_str = String::from("0");
         }
-        let mut bytecode_each = String::from("60") + &left_str + &hex_str + &String::from("600053600160002050");
-        contract_str = &(contract_str + &bytecode_each);
+        let bytecode_each = String::from("60") + &left_str + &hex_str + &String::from("600053600160002050");
+        contract_str.push_str(&bytecode_each);
     }
 
-    let contract_code: Bytes = Bytes::from_str(contract_str).unwrap();
+    let contract_code: Bytes = Bytes::from_str(&contract_str).unwrap();
 
     // Set up the EVM with a database and create the contract
-    let mut env = Env::default();
+    let env = Env::default();
 
     let bytecode = to_analysed(Bytecode::new_raw(contract_code));
 
