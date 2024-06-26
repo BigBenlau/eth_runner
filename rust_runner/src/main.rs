@@ -31,10 +31,13 @@ use std::fs::File;
 use csv::Error;
 use std::thread;
 
+pub mod contract_runner;
+use contract_runner::run_contract_code;
+
 // #[derive(Parser, Debug)]
 
 
-fn main() -> Result<(), Error> {
+fn run_block() -> Result<(), Error> {
     // Read Database Info
     // written in reth/src/commands/debug_cmd/build_block.rs (from line 147)
 
@@ -127,4 +130,10 @@ fn main() -> Result<(), Error> {
     // let gas_per_ms = gas_used_sum / exec_time_sum.as_millis();
     // println!("Total Gas Used is {:?} \nTotal Execution Time is {:?}\n Gas Used per millisecond is {:?}", gas_used_sum, exec_time_sum, gas_per_ms);
     Ok(())
+}
+
+
+fn main() {
+    // run_block().unwrap();
+    run_contract_code();
 }
