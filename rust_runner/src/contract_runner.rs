@@ -2,7 +2,7 @@ use std::{str::FromStr, thread, time::{Duration, Instant}};
 
 use reth_primitives::{Bytes, B256};
 use revm_interpreter::{
-    analysis::to_analysed, opcode::InstructionTables, primitives::{Address, Bytecode, CancunSpec, Env}, Contract, Interpreter, SharedMemory,
+    analysis::to_analysed, opcode::InstructionTables, primitives::{Bytecode, CancunSpec, Env}, Contract, Interpreter, SharedMemory,
     start_channel, print_records
 };
 
