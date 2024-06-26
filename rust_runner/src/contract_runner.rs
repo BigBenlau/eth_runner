@@ -1,4 +1,4 @@
-use std::{str::FromStr, thread, time::{Duration, Instant}};
+use std::{str::FromStr, thread, time::{Duration, Instant}, fmt::LowerHex};
 
 use reth_primitives::{Bytes, B256};
 use revm_interpreter::{
@@ -11,17 +11,24 @@ use reth_revm::{EvmBuilder, Handler};
 extern crate alloc;
 
 /// Revolutionary EVM (revm) runner interface
-const CALLER_ADDRESS: &str = "0x1000000000000000000000000000000000000001";
 const CONTRACT_ADDRESS: B256 = B256::new([1; 32]);
 
 pub fn run_contract_code() {
-    let caller_address = Address::from_str(CALLER_ADDRESS).unwrap();
+    let mut contract_str = "";
+    for i in 0..256 {
+        let mut hex_str = format!("{:x}", i);
+        let mut left_str = String::from("");
+        if hex_str.len() == 1 {
+            left_str = String::from("0");
+        }
+        let mut bytecode_each = String::from("60") + &left_str + &hex_str + &String::from("600053600160002050");
+        contract_str = &(contract_str + &bytecode_each);
+    }
 
-    let contract_code: Bytes = Bytes::from_str("6000").unwrap();
+    let contract_code: Bytes = Bytes::from_str(contract_str).unwrap();
 
     // Set up the EVM with a database and create the contract
     let mut env = Env::default();
-    env.tx.caller = caller_address;
 
     let bytecode = to_analysed(Bytecode::new_raw(contract_code));
 
