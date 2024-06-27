@@ -4,16 +4,16 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-reth-db = { git = "https://github.com/BigBenlau/reth_ben", rev = "b91f51dd", package = "reth-db"}
-reth-provider = { git = "https://github.com/BigBenlau/reth_ben", rev = "b91f51dd", package = "reth-provider"}
-reth-primitives = { git = "https://github.com/BigBenlau/reth_ben", rev = "b91f51dd", package = "reth-primitives"}
-reth-revm = { git = "https://github.com/BigBenlau/reth_ben", rev = "b91f51dd", package = "reth-revm"}
-reth-node-ethereum = { git = "https://github.com/BigBenlau/reth_ben", rev = "b91f51dd", package = "reth-node-ethereum"}
-reth-blockchain-tree = { git = "https://github.com/BigBenlau/reth_ben", rev = "b91f51dd", package = "reth-blockchain-tree"}
-reth-beacon-consensus =  { git = "https://github.com/BigBenlau/reth_ben", rev = "b91f51dd", package = "reth-beacon-consensus"}
-reth-interfaces = { git = "https://github.com/BigBenlau/reth_ben", rev = "b91f51dd", package = "reth-interfaces"}
+reth-db = { git = "https://github.com/BigBenlau/reth_ben", rev = "7065e3bc", package = "reth-db"}
+reth-provider = { git = "https://github.com/BigBenlau/reth_ben", rev = "7065e3bc", package = "reth-provider"}
+reth-primitives = { git = "https://github.com/BigBenlau/reth_ben", rev = "7065e3bc", package = "reth-primitives"}
+reth-revm = { git = "https://github.com/BigBenlau/reth_ben", rev = "7065e3bc", package = "reth-revm"}
+reth-node-ethereum = { git = "https://github.com/BigBenlau/reth_ben", rev = "7065e3bc", package = "reth-node-ethereum"}
+reth-blockchain-tree = { git = "https://github.com/BigBenlau/reth_ben", rev = "7065e3bc", package = "reth-blockchain-tree"}
+reth-beacon-consensus =  { git = "https://github.com/BigBenlau/reth_ben", rev = "7065e3bc", package = "reth-beacon-consensus"}
+reth-interfaces = { git = "https://github.com/BigBenlau/reth_ben", rev = "7065e3bc", package = "reth-interfaces"}
 
-revm-interpreter = { git = "https://github.com/BigBenlau/reth_ben", rev = "b91f51dd", package = "revm-interpreter"}
+revm-interpreter = { git = "https://github.com/BigBenlau/reth_ben", rev = "7065e3bc", package = "revm-interpreter"}
 
 tracing = "0.1.0"
 tracing-appender = "0.2"
