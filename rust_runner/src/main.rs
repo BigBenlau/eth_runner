@@ -134,6 +134,6 @@ fn run_block() -> Result<(), Error> {
 
 
 fn main() {
-    // run_block().unwrap();
-    run_contract_code();
+    run_block().unwrap();
+    // run_contract_code();
 }
