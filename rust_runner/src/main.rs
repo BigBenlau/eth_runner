@@ -32,7 +32,7 @@ use csv::Error;
 use std::thread;
 
 pub mod contract_runner;
-use contract_runner::run_contract_code;
+use contract_runner::{run_contract_code, run_precompile_hash};
 
 // #[derive(Parser, Debug)]
 
@@ -134,6 +134,7 @@ fn run_block() -> Result<(), Error> {
 
 
 fn main() {
-    run_block().unwrap();
+    // run_block().unwrap();
     // run_contract_code();
+    run_precompile_hash()
 }
