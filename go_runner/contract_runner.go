@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"math/big"
-	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -24,16 +24,16 @@ func check(e error) {
 }
 
 func main() {
-	// contractCodeHex := strings.Repeat("5f5f20", 256)
-	contractCodeHex := ""
-	var i int64
-	for i = 0; i < 256; i++ {
-		hex_str := strconv.FormatInt(i, 16)
-		if len(hex_str) == 1 {
-			hex_str = "0" + hex_str
-		}
-		contractCodeHex += "60" + hex_str + "600053600160002050"
-	}
+	contractCodeHex := strings.Repeat("5f5f2050", 256000)
+	// contractCodeHex := ""
+	// var i int64
+	// for i = 0; i < 256; i++ {
+	// 	hex_str := strconv.FormatInt(i, 16)
+	// 	if len(hex_str) == 1 {
+	// 		hex_str = "0" + hex_str
+	// 	}
+	// 	contractCodeHex += "60" + hex_str + "600053600160002050"
+	// }
 
 	contractCodeBytes := common.Hex2Bytes(string(contractCodeHex))
 
