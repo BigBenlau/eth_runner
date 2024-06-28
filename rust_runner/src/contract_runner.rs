@@ -103,7 +103,6 @@ pub fn run_precompile_hash() {
             sha2_result = sha256_run(&contract_code, 30000000u64).unwrap();
         }
         let dur = timer.elapsed().as_nanos();
-        println!("Show last result: {:?}", sha2_result);
-        println!("Show Byte len: {:?}. Used time: {:?}ns, average time: {:?}", contract_code.len(), dur, dur / 1000);
+        println!("Show Byte len: {:?}. Used gas: {:?}. Used time: {:?}ns, average time: {:?}", contract_code.len(), sha2_result.0, dur, dur / 1000);
     }
 }
