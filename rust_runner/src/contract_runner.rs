@@ -85,21 +85,25 @@ pub fn run_contract_code() {
 
 
 pub fn run_precompile_hash() {
-    let mut contract_str = String::from("01");
-    for _ in 0..1000 {
-        let bytecode_each = String::from("01");
-        contract_str.push_str(&bytecode_each);
+    let mut contract_str_1000 = String::from("");
+    for _ in 0..100 {
+        let bytecode_each = String::from("01010101010101010101");
+        contract_str_1000.push_str(&bytecode_each);
     }
-    let contract_code: Bytes = Bytes::from_str(&contract_str).unwrap();
-    println!("Contract code is: {:?}", contract_code.len());
+    for count in 0..1000 {
+        let mut contract_str = String::from("");
+        for _ in 0..count {
+            contract_str.push_str(&contract_str_1000);
+        }
+        let contract_code: Bytes = Bytes::from_str(&contract_str).unwrap();
 
-    let mut sha2_result: (u64, Bytes) = (u64::MIN, Bytes::default());
-    let timer = Instant::now();
-    for _ in 0..1000 {
-        sha2_result = sha256_run(&contract_code, 30000000u64).unwrap();
+        let mut sha2_result: (u64, Bytes) = (u64::MIN, Bytes::default());
+        let timer = Instant::now();
+        for _ in 0..1000 {
+            sha2_result = sha256_run(&contract_code, 30000000u64).unwrap();
+        }
+        let dur = timer.elapsed().as_nanos();
+        println!("Show last result: {:?}", sha2_result);
+        println!("Show Byte len: {:?}. Used time: {:?}ns, average time: {:?}", contract_code.len(), dur, dur / 1000);
     }
-    let dur = timer.elapsed().as_nanos();
-    println!("Show last result: {:?}", sha2_result);
-    println!("Show used time: {:?}ns", dur);
-
 }
