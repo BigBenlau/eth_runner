@@ -85,18 +85,16 @@ pub fn run_contract_code() {
 
 
 pub fn run_precompile_hash() {
-    // for _ in 0..256 {
-    //     let hex_str = String::from("00");
-    //     let bytecode_each = String::from("60") + &hex_str + &String::from("600053600160002050");
-    //     contract_str.push_str(&bytecode_each);
-    // }
-    // println!("show contract_str: {:?}", contract_str);
-    let contract_str = "01";
-    let contract_code: Bytes = Bytes::from_str(contract_str).unwrap();
-    println!("Contract code is: {:?}", contract_code);
+    let mut contract_str = String::from("01");
+    for _ in 0..1000 {
+        let bytecode_each = String::from("01");
+        contract_str.push_str(&bytecode_each);
+    }
+    let contract_code: Bytes = Bytes::from_str(&contract_str).unwrap();
+    println!("Contract code is: {:?}", contract_code.len());
 
-    let timer = Instant::now();
     let mut sha2_result: (u64, Bytes) = (u64::MIN, Bytes::default());
+    let timer = Instant::now();
     for _ in 0..1000 {
         sha2_result = sha256_run(&contract_code, 30000000u64).unwrap();
     }
