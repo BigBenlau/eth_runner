@@ -17,7 +17,13 @@ import (
 	"github.com/holiman/uint256"
 )
 
-func run_contract() {
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
+func main() {
 	// contractCodeHex := strings.Repeat("5f5f20", 256)
 	contractCodeHex := ""
 	var i int64
