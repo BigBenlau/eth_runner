@@ -57,7 +57,7 @@ func main() {
 	check(err)
 
 	zeroValue := big.NewInt(0)
-	gasLimit := ^uint64(30000000)
+	gasLimit := uint64(30000000)
 
 	tx := types.NewTx(&types.AccessListTx{
 		ChainID:  big.NewInt(1),
