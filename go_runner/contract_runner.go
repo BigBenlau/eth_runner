@@ -17,7 +17,7 @@ import (
 	"github.com/holiman/uint256"
 )
 
-func check(e error) {
+func check2(e error) {
 	if e != nil {
 		panic(e)
 	}
@@ -54,7 +54,7 @@ func main() {
 	}
 
 	statedb, err := state.New(common.Hash{}, state.NewDatabase(rawdb.NewMemoryDatabase()), nil)
-	check(err)
+	check2(err)
 
 	zeroValue := big.NewInt(0)
 	gasLimit := uint64(30000000)
@@ -91,5 +91,5 @@ func main() {
 	time.Sleep(10000)
 	parallel.Print_total_op_count_and_time()
 
-	check(err)
+	check2(err)
 }
