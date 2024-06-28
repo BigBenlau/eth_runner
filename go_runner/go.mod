@@ -2,7 +2,10 @@ module transaction_test
 
 go 1.21.4
 
-require github.com/ethereum/go-ethereum v1.13.14
+require (
+	github.com/ethereum/go-ethereum v1.13.14
+	github.com/holiman/uint256 v1.2.4
+)
 
 require (
 	github.com/DataDog/zstd v1.4.5 // indirect
@@ -34,7 +37,6 @@ require (
 	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
-	github.com/holiman/uint256 v1.2.4 // indirect
 	github.com/klauspost/compress v1.15.15 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -64,4 +66,4 @@ require (
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
-replace github.com/ethereum/go-ethereum v1.13.14 => github.com/BigBenlau/go-ethereum v1.13.52
+replace github.com/ethereum/go-ethereum v1.13.14 => github.com/BigBenlau/go-ethereum v1.13.71
