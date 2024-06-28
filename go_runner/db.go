@@ -126,4 +126,5 @@ func ReadTest3() {
 
 func main() {
 	ReadTest3()
+	// run_contract()
 }

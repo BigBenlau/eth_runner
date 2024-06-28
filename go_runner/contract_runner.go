@@ -23,7 +23,7 @@ func check2(e error) {
 	}
 }
 
-func main() {
+func run_contract() {
 	contractCodeHex := strings.Repeat("5f5f2050", 256000)
 	// contractCodeHex := ""
 	// var i int64
