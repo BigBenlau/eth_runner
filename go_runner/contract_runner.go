@@ -32,10 +32,8 @@ func main() {
 		if len(hex_str) == 1 {
 			hex_str = "0" + hex_str
 		}
-		fmt.Println(hex_str)
 		contractCodeHex += "60" + hex_str + "600053600160002050"
 	}
-	fmt.Println("contractCodeHex is:", contractCodeHex)
 
 	contractCodeBytes := common.Hex2Bytes(string(contractCodeHex))
 
