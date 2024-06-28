@@ -93,14 +93,15 @@ pub fn run_precompile_hash() {
     // println!("show contract_str: {:?}", contract_str);
     let contract_str = "01";
     let contract_code: Bytes = Bytes::from_str(contract_str).unwrap();
+    println!("Contract code is: {:?}", contract_code);
 
     let timer = Instant::now();
     let mut sha2_result: (u64, Bytes) = (u64::MIN, Bytes::default());
     for _ in 0..1000 {
         sha2_result = sha256_run(&contract_code, 30000000u64).unwrap();
     }
-    let dur = timer.elapsed();
+    let dur = timer.elapsed().as_nanos();
     println!("Show last result: {:?}", sha2_result);
-    println!("Show used time: {:?}", dur);
+    println!("Show used time: {:?}ns", dur);
 
 }
