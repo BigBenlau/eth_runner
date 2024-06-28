@@ -6,7 +6,9 @@ use revm_interpreter::{
     start_channel, print_records
 };
 
-use reth_revm::{EvmBuilder, Handler};
+use reth_revm::{primitives::result, EvmBuilder, Handler};
+
+pub use reth_revm::revm::precompile::hash::sha256_run;
 
 extern crate alloc;
 
@@ -76,4 +78,29 @@ pub fn run_contract_code() {
 
     // 打印每個opcode運行總時間
     print_records();
+}
+
+
+
+
+
+pub fn run_precompile_hash() {
+    // for _ in 0..256 {
+    //     let hex_str = String::from("00");
+    //     let bytecode_each = String::from("60") + &hex_str + &String::from("600053600160002050");
+    //     contract_str.push_str(&bytecode_each);
+    // }
+    // println!("show contract_str: {:?}", contract_str);
+    let contract_str = "01";
+    let contract_code: Bytes = Bytes::from_str(contract_str).unwrap();
+
+    let timer = Instant::now();
+    let mut sha2_result: (u64, Bytes) = (u64::MIN, Bytes::default());
+    for _ in 0..1000 {
+        sha2_result = sha256_run(&contract_code, 30000000u64).unwrap();
+    }
+    let dur = timer.elapsed();
+    println!("Show last result: {:?}", sha2_result);
+    println!("Show used time: {:?}", dur);
+
 }
