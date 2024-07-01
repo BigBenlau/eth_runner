@@ -1,24 +1,26 @@
 use reth_db::{open_db_read_only, mdbx::DatabaseArguments, models::client_version::ClientVersion};
 
-use reth_provider::{BlockReaderIdExt, StateProviderFactory, BlockExecutor, ProviderFactory, providers::BlockchainProvider, TransactionVariant};
+use reth_provider::{BlockReaderIdExt, StateProviderFactory, ProviderFactory, TransactionVariant,
+    providers::{BlockchainProvider, StaticFileProvider}
+};
+
+use reth_chainspec::MAINNET;
 
 use reth_primitives::{
-    MAINNET, BlockId, U256
+    BlockId, U256
 };
 
-use reth_revm::{
-    database::StateProviderDatabase,
-    processor::EVMProcessor,
-    EvmProcessorFactory
-};
-use reth_node_ethereum::EthEvmConfig;
+use reth_revm::database::StateProviderDatabase;
+
+use reth_evm_ethereum::execute::EthExecutorProvider;
 
 use reth_blockchain_tree::{
     BlockchainTree, BlockchainTreeConfig, ShareableBlockchainTree, TreeExternals,
 };
-use reth_beacon_consensus::BeaconConsensus;
 
-use reth_interfaces::consensus::Consensus;
+use reth_beacon_consensus::EthBeaconConsensus;
+
+use reth_consensus::Consensus;
 
 use revm_interpreter::{
     start_channel, print_records
@@ -31,15 +33,15 @@ use std::fs::File;
 use csv::Error;
 use std::thread;
 
-pub mod contract_runner;
-use contract_runner::run_contract_code;
+// pub mod contract_runner;
+// use contract_runner::run_contract_code;
 
 // #[derive(Parser, Debug)]
 
 
 fn run_block() -> Result<(), Error> {
     // Read Database Info
-    // written in reth/src/commands/debug_cmd/build_block.rs (from line 147)
+    // written in bin/reth/src/commands/debug_cmd/build_block.rs (from line 147)
 
     let db_path_str = String::from("/home/user/common/docker/volumes/eth-docker_reth-el-data/_data/db");
     let db_path = Path::new(&db_path_str);
@@ -47,21 +49,21 @@ fn run_block() -> Result<(), Error> {
 
     let static_files_path_str = String::from("/home/user/common/docker/volumes/eth-docker_reth-el-data/_data/static_files");
     let static_file_path = Path::new(&static_files_path_str).to_path_buf();
+    let static_file_provider = StaticFileProvider::read_only(static_file_path).unwrap();
 
     let chain_spec = MAINNET.clone();
 
-    let provider_factory = ProviderFactory::new(db.clone(), chain_spec.clone(), static_file_path,).unwrap();
+    let provider_factory = ProviderFactory::new(db.clone(), chain_spec.clone(), static_file_provider);
 
-    let consensus: Arc<dyn Consensus> = Arc::new(BeaconConsensus::new(chain_spec.clone()));
-    let evm_config = EthEvmConfig::default();
+    let consensus: Arc<dyn Consensus> = Arc::new(EthBeaconConsensus::new(chain_spec.clone()));
 
     let tree_externals = TreeExternals::new(
         provider_factory.clone(),
         Arc::clone(&consensus),
-        EvmProcessorFactory::new(chain_spec.clone(), evm_config),
+        EthExecutorProvider::mainnet(),
     );
     let tree = BlockchainTree::new(tree_externals, BlockchainTreeConfig::default(), None).unwrap();
-    let blockchain_tree = ShareableBlockchainTree::new(tree);
+    let blockchain_tree = Arc::new(ShareableBlockchainTree::new(tree));
 
     let blockchain_db =
     BlockchainProvider::new(provider_factory.clone(), blockchain_tree.clone()).unwrap();
@@ -89,14 +91,17 @@ fn run_block() -> Result<(), Error> {
         let new_block = blockchain_db.block_with_senders_by_id(BlockId::from(new_block_num), TransactionVariant::WithHash).unwrap().unwrap();
 
         let state_provider = blockchain_db.history_by_block_number(old_block_num).unwrap();
+        let state_provider_db = StateProviderDatabase::new(state_provider);
 
-        let mut executor = EVMProcessor::new_with_db(chain_spec.clone(), StateProviderDatabase::new(state_provider), evm_config);
+        let mut executor = EthExecutorProvider::mainnet().eth_executor(state_provider_db);
+
+        // let mut executor = EthBlockExecutor::new(chain_spec.clone(), evm_config, StateProviderDatabase::new(state_provider));
 
         // let result = executor.execute_and_verify_receipt(&new_block, U256::ZERO, None).unwrap();
 
         let exec_start_time = Instant::now();
 
-        executor.execute_transactions(&new_block, U256::ZERO).unwrap();
+        executor.execute_without_verification(&new_block, U256::ZERO).unwrap();
 
         let exec_end_time = Instant::now();
         let exec_diff = exec_end_time.duration_since(exec_start_time);
@@ -134,6 +139,6 @@ fn run_block() -> Result<(), Error> {
 
 
 fn main() {
-    // run_block().unwrap();
-    run_contract_code();
+    run_block().unwrap();
+    // run_contract_code();
 }
