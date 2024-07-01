@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"math/big"
-	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -17,19 +17,23 @@ import (
 	"github.com/holiman/uint256"
 )
 
-func run_contract() {
-	// contractCodeHex := strings.Repeat("5f5f20", 256)
-	contractCodeHex := ""
-	var i int64
-	for i = 0; i < 256; i++ {
-		hex_str := strconv.FormatInt(i, 16)
-		if len(hex_str) == 1 {
-			hex_str = "0" + hex_str
-		}
-		fmt.Println(hex_str)
-		contractCodeHex += "60" + hex_str + "600053600160002050"
+func check2(e error) {
+	if e != nil {
+		panic(e)
 	}
-	fmt.Println("contractCodeHex is:", contractCodeHex)
+}
+
+func run_contract() {
+	contractCodeHex := strings.Repeat("5f5f2050", 256000)
+	// contractCodeHex := ""
+	// var i int64
+	// for i = 0; i < 256; i++ {
+	// 	hex_str := strconv.FormatInt(i, 16)
+	// 	if len(hex_str) == 1 {
+	// 		hex_str = "0" + hex_str
+	// 	}
+	// 	contractCodeHex += "60" + hex_str + "600053600160002050"
+	// }
 
 	contractCodeBytes := common.Hex2Bytes(string(contractCodeHex))
 
@@ -50,10 +54,10 @@ func run_contract() {
 	}
 
 	statedb, err := state.New(common.Hash{}, state.NewDatabase(rawdb.NewMemoryDatabase()), nil)
-	check(err)
+	check2(err)
 
 	zeroValue := big.NewInt(0)
-	gasLimit := ^uint64(30000000)
+	gasLimit := uint64(30000000)
 
 	tx := types.NewTx(&types.AccessListTx{
 		ChainID:  big.NewInt(1),
@@ -87,5 +91,5 @@ func run_contract() {
 	time.Sleep(10000)
 	parallel.Print_total_op_count_and_time()
 
-	check(err)
+	check2(err)
 }
