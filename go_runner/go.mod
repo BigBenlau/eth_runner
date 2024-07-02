@@ -1,4 +1,4 @@
-module transaction_test
+module tx_test
 
 go 1.21.4
 
