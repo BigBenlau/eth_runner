@@ -29,16 +29,15 @@ func check(e error) {
 }
 
 func get_block_num(csvReader *csv.Reader) (uint64, bool) {
-	end_checking := false
 	rec, err := csvReader.Read()
 	if err == io.EOF || rec[0] == "" {
-		end_checking = true
+		return 0, true
 	}
 	if err != nil {
 		log.Fatal(err)
 	}
 	headnumber, _ := strconv.ParseUint(rec[0], 10, 64)
-	return headnumber, end_checking
+	return headnumber, false
 }
 
 func get_pre_block_data(bc *core.BlockChain, db ethdb.Database, headnumber uint64) (*types.Block, *state.StateDB) {
@@ -106,7 +105,7 @@ func ReadTest3() {
 	csvReader := csv.NewReader(f)
 	first_block_tag := true
 
-	var end_block_check bool
+	var final_flag bool
 
 	var cur_block_num uint64
 	var cur_statedb *state.StateDB
@@ -119,21 +118,22 @@ func ReadTest3() {
 	run_start_time := time.Now()
 	for {
 		if first_block_tag {
-			cur_block_num, end_block_check = get_block_num(csvReader)
+			cur_block_num, final_flag = get_block_num(csvReader)
 			cur_block, cur_statedb = get_pre_block_data(bc, db, cur_block_num)
 			first_block_tag = false
 		}
 
-		if end_block_check {
+		if final_flag {
 			break
 		}
 
 		fmt.Println("Headnumber is:", cur_block_num, "round idx is: ", round_count)
 		round_count += 1
 
-		follow_block_num, end_block_check = get_block_num(csvReader)
-
-		follow_block, follow_statedb = get_pre_block_data(bc, db, follow_block_num)
+		follow_block_num, final_flag = get_block_num(csvReader)
+		if follow_block_num > 0 {
+			follow_block, follow_statedb = get_pre_block_data(bc, db, follow_block_num)
+		}
 
 		// concurrent run the following block
 		var followupInterrupt atomic.Bool
