@@ -92,6 +92,7 @@ func ReadTest3() {
 	// headnumber := *headnumber_adr
 
 	total_exec_elapsedTime := time.Duration(0)
+	total_validate_elapsedTime := time.Duration(0)
 	total_exec_time := time.Duration(0)
 	total_used_gas := uint64(0)
 	parallel.Start_channel()
@@ -145,8 +146,12 @@ func ReadTest3() {
 
 		exec_startTime := time.Now()
 		// _, _, usedGas, _, op_count, op_time, op_time_list, op_gas_list := bc.Processor().Process(block, statedb, vm.Config{})
-		_, _, usedGas, _, _, _, _, _ := bc.Processor().Process(cur_block, cur_statedb, vm.Config{})
+		receipts, _, usedGas, _, _, _, _, _ := bc.Processor().Process(cur_block, cur_statedb, vm.Config{})
 		exec_elapsedTime := time.Since(exec_startTime)
+
+		validate_startTime := time.Now()
+		bc.Validator().ValidateState(cur_block, cur_statedb, receipts, usedGas)
+		validate_elapsedTime := time.Since(validate_startTime)
 
 		if prefetch_control {
 			followupInterrupt.Store(true)
@@ -157,6 +162,7 @@ func ReadTest3() {
 		exec_time := exec_elapsedTime - trieRead                                // The time spent on EVM processing
 
 		total_exec_elapsedTime += exec_elapsedTime
+		total_validate_elapsedTime += validate_elapsedTime
 		total_exec_time += exec_time
 		total_used_gas += usedGas
 
@@ -173,6 +179,7 @@ func ReadTest3() {
 
 	fmt.Println("Total Run Loop Time:", run_elapsedTime)
 	fmt.Println("Total Elapsed Time:", total_exec_elapsedTime)
+	fmt.Println("Total Validate Time:", total_validate_elapsedTime)
 	fmt.Println("Total Exec Time:", total_exec_time)
 	fmt.Println("Total Used Gas:", total_used_gas)
 
