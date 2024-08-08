@@ -110,21 +110,23 @@ fn run_block() -> Result<(), Error> {
         // executor.execute_without_verification(&new_block, U256::ZERO).unwrap();
         let state = executor.execute((&new_block, U256::MAX).into()).unwrap();
 
-        let exec_diff = exec_start_time.elapsed().as_nanos();
+        let exec_diff = exec_start_time.elapsed();
         total_exec_diff += exec_diff;
 
         let BlockExecutionOutput { state, receipts, requests, .. } = state;
 
         // do post validation
         let val_start_time = Instant::now();
-        consensus.validate_block_post_execution(&new_block, PostExecutionInput::new(&receipts, &requests));
-        let val_dur = val_start_time.elapsed().as_nanos();
+        consensus.validate_block_post_execution(&new_block, PostExecutionInput::new(&receipts, &requests)).ok();
+        let val_dur = val_start_time.elapsed();
+        total_post_validation_diff += val_dur;
 
         // calculate and check state root
+        let state_provider_2 = blockchain_db.history_by_block_number(old_block_num).unwrap();
         let merkle_start = Instant::now();
-        let (state_root, trie_updates) = (state_provider.state_root(&state).unwrap(), None);
+        let state_root = state_provider_2.state_root(&state);
 
-        let merkle_dur = merkle_start.elapsed().as_nanos();
+        let merkle_dur = merkle_start.elapsed();
         total_merkle_dur += merkle_dur;
 
         println!("Show block state_root: {:?}", state_root);
