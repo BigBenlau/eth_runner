@@ -122,7 +122,7 @@ fn run_block() -> Result<(), Error> {
         total_post_validation_diff += val_dur;
 
         // calculate and check state root
-        let state_provider_2 = blockchain_db.history_by_block_number(old_block_num).unwrap();
+        let state_provider_2 = blockchain_db.latest().unwrap();
         let merkle_start = Instant::now();
         let state_root = state_provider_2.state_root(&state);
 
