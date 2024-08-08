@@ -12,6 +12,10 @@ use reth_primitives::{
 
 use reth_revm::database::StateProviderDatabase;
 
+use reth_evm::execute::{
+    Executor, BlockExecutionOutput
+};
+
 use reth_evm_ethereum::execute::EthExecutorProvider;
 
 use reth_blockchain_tree::{
@@ -20,7 +24,9 @@ use reth_blockchain_tree::{
 
 use reth_beacon_consensus::EthBeaconConsensus;
 
-use reth_consensus::Consensus;
+use reth_consensus::{
+    Consensus, PostExecutionInput
+};
 
 use revm_interpreter::{
     start_channel, print_records
@@ -38,6 +44,7 @@ use std::thread;
 
 // #[derive(Parser, Debug)]
 
+const PARALLEL_STATEROOT: bool = false;
 
 fn run_block() -> Result<(), Error> {
     // Read Database Info
@@ -73,6 +80,8 @@ fn run_block() -> Result<(), Error> {
     let _ = start_channel();
 
     let mut total_exec_diff = Duration::ZERO;
+    let mut total_post_validation_diff = Duration::ZERO;
+    let mut total_merkle_dur = Duration::ZERO;
     let start_time = Instant::now();
 
     // Execute Block by block number
@@ -95,31 +104,35 @@ fn run_block() -> Result<(), Error> {
 
         let mut executor = EthExecutorProvider::mainnet().eth_executor(state_provider_db);
 
-        // let mut executor = EthBlockExecutor::new(chain_spec.clone(), evm_config, StateProviderDatabase::new(state_provider));
-
-        // let result = executor.execute_and_verify_receipt(&new_block, U256::ZERO, None).unwrap();
-
+        // execution
         let exec_start_time = Instant::now();
 
-        executor.execute_without_verification(&new_block, U256::ZERO).unwrap();
+        // executor.execute_without_verification(&new_block, U256::ZERO).unwrap();
+        let state = executor.execute((&new_block, U256::MAX).into()).unwrap();
 
-        let exec_end_time = Instant::now();
-        let exec_diff = exec_end_time.duration_since(exec_start_time);
+        let exec_diff = exec_start_time.elapsed().as_nanos();
         total_exec_diff += exec_diff;
 
-        // let stat = executor.stats();
-        // let result = executor.take_output_state();
-        // println!("Show result: {:?}", result);
+        let BlockExecutionOutput { state, receipts, requests, .. } = state;
 
+        // do post validation
+        let val_start_time = Instant::now();
+        consensus.validate_block_post_execution(&new_block, PostExecutionInput::new(&receipts, &requests));
+        let val_dur = val_start_time.elapsed().as_nanos();
 
+        // calculate and check state root
+        let merkle_start = Instant::now();
+        let (state_root, trie_updates) = (state_provider.state_root(&state).unwrap(), None);
+
+        let merkle_dur = merkle_start.elapsed().as_nanos();
+        total_merkle_dur += merkle_dur;
+
+        println!("Show block state_root: {:?}", state_root);
         round_num += 1;
         // gas_used_sum += gas_used;
 
-        println!("new block number {:?}, round: {:?}", new_block_num, round_num);
+        println!("Current block num: {:?}, round: {:?}, exec_time: {:?}, valiation_time: {:?}, merkle_time: {:?}", new_block_num, round_num, exec_diff, val_dur, merkle_dur);
     }
-
-
-    let end_time = Instant::now();
 
     // 確保channel能完成所有工作
     thread::sleep(Duration::from_secs(3));
@@ -127,10 +140,11 @@ fn run_block() -> Result<(), Error> {
     // 打印每個opcode運行總時間
     print_records();
 
-    let diff = end_time.duration_since(start_time);
+    let diff = start_time.elapsed();
     println!("Overall Duration Time is {:?} s", diff.as_secs_f64());
     println!("Total Execution Time is {:?} s\n", total_exec_diff.as_secs_f64());
-
+    println!("Total Post Validation Time is {:?} s\n", total_post_validation_diff.as_secs_f64());
+    println!("Total Merkleization Time is {:?} s\n", total_merkle_dur.as_secs_f64());
 
     // let gas_per_ms = gas_used_sum / exec_time_sum.as_millis();
     // println!("Total Gas Used is {:?} \nTotal Execution Time is {:?}\n Gas Used per millisecond is {:?}", gas_used_sum, exec_time_sum, gas_per_ms);
