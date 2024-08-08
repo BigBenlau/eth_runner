@@ -44,7 +44,7 @@ use std::thread;
 
 // #[derive(Parser, Debug)]
 
-const PARALLEL_STATEROOT: bool = false;
+// const PARALLEL_STATEROOT: bool = false;
 
 fn run_block() -> Result<(), Error> {
     // Read Database Info
@@ -102,7 +102,7 @@ fn run_block() -> Result<(), Error> {
         let state_provider = blockchain_db.history_by_block_number(old_block_num).unwrap();
         let state_provider_db = StateProviderDatabase::new(state_provider);
 
-        let mut executor = EthExecutorProvider::mainnet().eth_executor(state_provider_db);
+        let executor = EthExecutorProvider::mainnet().eth_executor(state_provider_db);
 
         // execution
         let exec_start_time = Instant::now();
