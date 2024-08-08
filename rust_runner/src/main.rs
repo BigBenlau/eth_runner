@@ -108,7 +108,7 @@ fn run_block() -> Result<(), Error> {
         let exec_start_time = Instant::now();
 
         // executor.execute_without_verification(&new_block, U256::ZERO).unwrap();
-        let state = executor.execute((&new_block, U256::MAX).into()).unwrap();
+        let state = executor.execute((&new_block, U256::ZERO).into()).unwrap();
 
         let exec_diff = exec_start_time.elapsed();
         total_exec_diff += exec_diff;
@@ -144,8 +144,8 @@ fn run_block() -> Result<(), Error> {
 
     let diff = start_time.elapsed();
     println!("Overall Duration Time is {:?} s", diff.as_secs_f64());
-    println!("Total Execution Time is {:?} s\n", total_exec_diff.as_secs_f64());
-    println!("Total Post Validation Time is {:?} s\n", total_post_validation_diff.as_secs_f64());
+    println!("Total Execution Time is {:?} s", total_exec_diff.as_secs_f64());
+    println!("Total Post Validation Time is {:?} s", total_post_validation_diff.as_secs_f64());
     println!("Total Merkleization Time is {:?} s\n", total_merkle_dur.as_secs_f64());
 
     // let gas_per_ms = gas_used_sum / exec_time_sum.as_millis();
