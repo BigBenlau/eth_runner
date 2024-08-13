@@ -123,6 +123,8 @@ fn run_block() -> Result<(), Error> {
 
         // calculate and check state root
         let state_provider_2 = blockchain_db.latest().unwrap();
+        println!("Start calculate state root.");
+        println!("print bundle state: {:?}\n bundle state.state: {:?}", state, state.state);
         let merkle_start = Instant::now();
         let state_root = state_provider_2.state_root(&state);
 
