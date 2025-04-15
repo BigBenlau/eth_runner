@@ -73,7 +73,7 @@ func exec_tx(tx *types.Transaction, idx int, signer types.Signer, evm *vm.EVM, c
 }
 
 func ReadTest3() {
-	datadir := "/home/user/common/docker/volumes/cp1_eth-docker_geth-eth1-data/_data/geth/chaindata"
+	datadir := "/home/user/common/docker/volumes/eth-docker_geth-eth1-data/_data/geth/chaindata"
 	// datadir := "/home/user/data/ben/cp1_eth-docker_geth-eth1-data/_data/geth/chaindata"
 	ancient := datadir + "/ancient"
 	db, err := rawdb.Open(
@@ -172,9 +172,11 @@ func ReadTest3() {
 
 			total_exec_elapsedTime += exec_elapsedTime
 			total_exec_time += exec_time
-			fmt.Println("Cur tx idx: ", idx, "total_exec_elapsedTime: ", total_exec_elapsedTime, "total_exec_time: ", total_exec_time)
+			fmt.Println("Cur tx idx: ", idx, "exec_elapsedTime: ", exec_elapsedTime, "exec_time: ", exec_time)
 			// total_used_gas += usedGas
 		}
+
+		fmt.Println("total_exec_elapsedTime: ", total_exec_elapsedTime, "total_exec_time: ", total_exec_time)
 
 		// validate_startTime := time.Now()
 		// bc.Validator().ValidateState(cur_block, cur_statedb, receipts, usedGas)
