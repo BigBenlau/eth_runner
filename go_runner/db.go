@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"sync/atomic"
 	"time"
 
 	"github.com/ethereum/go-ethereum/consensus/ethash"
@@ -20,7 +19,7 @@ import (
 	"github.com/ethereum/go-ethereum/parallel"
 )
 
-var prefetch_control bool = true
+// var prefetch_control bool = true
 
 func check(e error) {
 	if e != nil {
@@ -44,22 +43,22 @@ func get_pre_block_data(bc *core.BlockChain, db ethdb.Database, headnumber uint6
 	parentnumber := headnumber - 1
 	hashtest := rawdb.ReadCanonicalHash(db, headnumber)
 	parenthash := rawdb.ReadCanonicalHash(db, parentnumber)
-	block := rawdb.ReadBlock(db, hashtest, headnumber)
 
-	if block == nil {
+	cur_block := bc.GetBlock(hashtest, headnumber)
+	if cur_block == nil {
 		log.Fatal("Failed to retrieve the latest block header")
 	}
-	parentblock := rawdb.ReadBlock(db, parenthash, parentnumber)
+	parentblock := bc.GetBlock(parenthash, parentnumber)
 	if parentblock == nil {
-		log.Fatal("Failed to retrieve the latest block header")
+		log.Fatal("Failed to retrieve the pervious block")
 	}
 
 	parentRoot := parentblock.Root()
-	statedb, _ := bc.StateAt(parentRoot)
-	if statedb == nil {
+	statedb, stateErr := bc.StateAt(parentRoot)
+	if stateErr != nil {
 		log.Fatal("Failed to retrieve the statedb of parentRoot")
 	}
-	return block, statedb
+	return cur_block, statedb
 }
 
 func ReadTest3() {
@@ -136,13 +135,13 @@ func ReadTest3() {
 			follow_block, follow_statedb = get_pre_block_data(bc, db, follow_block_num)
 		}
 
-		// concurrent run the following block
-		var followupInterrupt atomic.Bool
-		if prefetch_control {
-			if follow_block_num > 0 {
-				go bc.RunPrefetcherBen(follow_block, follow_statedb.Copy(), &followupInterrupt)
-			}
-		}
+		// // concurrent run the following block
+		// var followupInterrupt atomic.Bool
+		// if prefetch_control {
+		// 	if follow_block_num > 0 {
+		// 		go bc.RunPrefetcherBen(follow_block, follow_statedb.Copy(), &followupInterrupt)
+		// 	}
+		// }
 
 		exec_startTime := time.Now()
 		// _, _, usedGas, _, op_count, op_time, op_time_list, op_gas_list := bc.Processor().Process(block, statedb, vm.Config{})
@@ -153,9 +152,9 @@ func ReadTest3() {
 		bc.Validator().ValidateState(cur_block, cur_statedb, receipts, usedGas)
 		validate_elapsedTime := time.Since(validate_startTime)
 
-		if prefetch_control {
-			followupInterrupt.Store(true)
-		}
+		// if prefetch_control {
+		// 	followupInterrupt.Store(true)
+		// }
 
 		trieRead := cur_statedb.SnapshotAccountReads + cur_statedb.AccountReads // The time spent on account read
 		trieRead += cur_statedb.SnapshotStorageReads + cur_statedb.StorageReads // The time spent on storage read
