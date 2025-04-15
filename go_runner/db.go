@@ -60,6 +60,18 @@ func get_pre_block_data(bc *core.BlockChain, db ethdb.Database, headnumber uint6
 	return cur_block, statedb
 }
 
+func exec_tx(tx *types.Transaction, idx int, signer types.Signer, evm *vm.EVM, cur_block *types.Block, cur_statedb *state.StateDB) {
+	msg, _ := core.TransactionToMessage(tx, signer, cur_block.BaseFee())
+	txContext := core.NewEVMTxContext(msg)
+	cur_statedb.SetTxContext(tx.Hash(), idx)
+	evm.Reset(txContext, cur_statedb)
+	_, err := core.ApplyMessage(evm, msg, new(core.GasPool).AddGas(tx.Gas()))
+	if err != nil {
+		log.Fatal(fmt.Errorf("transaction %#x failed: %v", tx.Hash(), err))
+	}
+	cur_statedb.Finalise(evm.ChainConfig().IsEIP158(cur_block.Number()))
+}
+
 func ReadTest3() {
 	datadir := "/home/user/common/docker/volumes/cp1_eth-docker_geth-eth1-data/_data/geth/chaindata"
 	// datadir := "/home/user/data/ben/cp1_eth-docker_geth-eth1-data/_data/geth/chaindata"
@@ -120,6 +132,10 @@ func ReadTest3() {
 			cur_block_num, final_flag = get_block_num(csvReader)
 			cur_block, cur_statedb = get_pre_block_data(bc, db, cur_block_num)
 			first_block_tag = false
+		} else {
+			cur_block_num = follow_block_num
+			cur_statedb = follow_statedb
+			cur_block = follow_block
 		}
 
 		if final_flag {
@@ -129,11 +145,6 @@ func ReadTest3() {
 		fmt.Println("Headnumber is:", cur_block_num, "round idx is: ", round_count)
 		round_count += 1
 
-		follow_block_num, final_flag = get_block_num(csvReader)
-		if follow_block_num > 0 {
-			follow_block, follow_statedb = get_pre_block_data(bc, db, follow_block_num)
-		}
-
 		// // concurrent run the following block
 		// var followupInterrupt atomic.Bool
 		// if prefetch_control {
@@ -142,31 +153,43 @@ func ReadTest3() {
 		// 	}
 		// }
 
-		exec_startTime := time.Now()
-		// _, _, usedGas, _, op_count, op_time, op_time_list, op_gas_list := bc.Processor().Process(block, statedb, vm.Config{})
-		receipts, _, usedGas, _, _, _, _, _ := bc.Processor().Process(cur_block, cur_statedb, vm.Config{})
-		exec_elapsedTime := time.Since(exec_startTime)
+		var (
+			context = core.NewEVMBlockContext(cur_block.Header(), bc, nil)
+			vmenv   = vm.NewEVM(context, vm.TxContext{}, cur_statedb, bc.Config(), vm.Config{})
+			signer  = types.MakeSigner(bc.Config(), cur_block.Number(), cur_block.Time())
+		)
 
-		validate_startTime := time.Now()
-		bc.Validator().ValidateState(cur_block, cur_statedb, receipts, usedGas)
-		validate_elapsedTime := time.Since(validate_startTime)
+		for idx, tx := range cur_block.Transactions() {
+			exec_startTime := time.Now()
+			// _, _, usedGas, _, op_count, op_time, op_time_list, op_gas_list := bc.Processor().Process(block, statedb, vm.Config{})
+			// receipts, _, usedGas, _, _, _, _, _ := bc.Processor().Process(cur_block, cur_statedb, vm.Config{})
+			exec_tx(tx, idx, signer, vmenv, cur_block, cur_statedb)
+			exec_elapsedTime := time.Since(exec_startTime)
+
+			trieRead := cur_statedb.SnapshotAccountReads + cur_statedb.AccountReads // The time spent on account read
+			trieRead += cur_statedb.SnapshotStorageReads + cur_statedb.StorageReads // The time spent on storage read
+			exec_time := exec_elapsedTime - trieRead                                // The time spent on EVM processing
+
+			total_exec_elapsedTime += exec_elapsedTime
+			total_exec_time += exec_time
+			fmt.Println("Cur tx idx: ", idx, "total_exec_elapsedTime: ", total_exec_elapsedTime, "total_exec_time: ", total_exec_time)
+			// total_used_gas += usedGas
+		}
+
+		// validate_startTime := time.Now()
+		// bc.Validator().ValidateState(cur_block, cur_statedb, receipts, usedGas)
+		// validate_elapsedTime := time.Since(validate_startTime)
+
+		// total_validate_elapsedTime += validate_elapsedTime
 
 		// if prefetch_control {
 		// 	followupInterrupt.Store(true)
 		// }
 
-		trieRead := cur_statedb.SnapshotAccountReads + cur_statedb.AccountReads // The time spent on account read
-		trieRead += cur_statedb.SnapshotStorageReads + cur_statedb.StorageReads // The time spent on storage read
-		exec_time := exec_elapsedTime - trieRead                                // The time spent on EVM processing
-
-		total_exec_elapsedTime += exec_elapsedTime
-		total_validate_elapsedTime += validate_elapsedTime
-		total_exec_time += exec_time
-		total_used_gas += usedGas
-
-		cur_block_num = follow_block_num
-		cur_statedb = follow_statedb
-		cur_block = follow_block
+		follow_block_num, final_flag = get_block_num(csvReader)
+		if follow_block_num > 0 {
+			follow_block, follow_statedb = get_pre_block_data(bc, db, follow_block_num)
+		}
 	}
 	// loop finish
 
