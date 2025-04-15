@@ -16,7 +16,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/parallel"
 )
 
 // var prefetch_control bool = true
@@ -94,7 +93,7 @@ func ReadTest3() {
 	total_validate_elapsedTime := time.Duration(0)
 	total_exec_time := time.Duration(0)
 	total_used_gas := uint64(0)
-	parallel.Start_channel()
+	// parallel.Start_channel()
 
 	round_count := uint64(0)
 
@@ -174,7 +173,7 @@ func ReadTest3() {
 	run_elapsedTime := time.Since(run_start_time)
 
 	// print records
-	parallel.Print_total_op_count_and_time()
+	// parallel.Print_total_op_count_and_time()
 
 	fmt.Println("Total Run Loop Time:", run_elapsedTime)
 	fmt.Println("Total Elapsed Time:", total_exec_elapsedTime)
