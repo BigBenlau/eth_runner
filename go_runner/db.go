@@ -158,6 +158,8 @@ func ReadTest3() {
 			vmenv   = vm.NewEVM(context, vm.TxContext{}, cur_statedb, bc.Config(), vm.Config{})
 			signer  = types.MakeSigner(bc.Config(), cur_block.Number(), cur_block.Time())
 		)
+		pre_state_root := cur_statedb.IntermediateRoot(bc.Config().IsEIP158(cur_block.Number())).String()
+		fmt.Println("state_root:", pre_state_root)
 
 		for idx, tx := range cur_block.Transactions() {
 			exec_startTime := time.Now()
@@ -178,9 +180,12 @@ func ReadTest3() {
 
 		fmt.Println("total_exec_elapsedTime: ", total_exec_elapsedTime, "total_exec_time: ", total_exec_time)
 
-		// validate_startTime := time.Now()
+		validate_startTime := time.Now()
+		state_root := cur_statedb.IntermediateRoot(bc.Config().IsEIP158(cur_block.Number())).String()
 		// bc.Validator().ValidateState(cur_block, cur_statedb, receipts, usedGas)
-		// validate_elapsedTime := time.Since(validate_startTime)
+		validate_elapsedTime := time.Since(validate_startTime)
+		fmt.Println("state_root:", state_root, "validate_elapsedTime:", validate_elapsedTime)
+		fmt.Println("header_root:", cur_block.Header().Root)
 
 		// total_validate_elapsedTime += validate_elapsedTime
 
