@@ -161,6 +161,8 @@ func ReadTest3() {
 		pre_state_root := cur_statedb.IntermediateRoot(bc.Config().IsEIP158(cur_block.Number())).String()
 		fmt.Println("state_root:", pre_state_root)
 
+		core.ProcessBeaconBlockRoot(*cur_block.BeaconRoot(), vmenv, cur_statedb)
+
 		for idx, tx := range cur_block.Transactions() {
 			exec_startTime := time.Now()
 			// _, _, usedGas, _, op_count, op_time, op_time_list, op_gas_list := bc.Processor().Process(block, statedb, vm.Config{})
