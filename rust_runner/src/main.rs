@@ -11,7 +11,7 @@ use reth_primitives::{BlockId, U256};
 
 use reth_revm::{database::StateProviderDatabase, State};
 
-use reth_evm::execute::{self, BlockExecutionOutput, Executor};
+use reth_evm::execute::{BlockExecutionOutput, Executor};
 
 use reth_evm_ethereum::{
     execute::{EthBlockExecutor, EthExecutorProvider},
@@ -128,10 +128,10 @@ fn run_block() -> Result<(), Error> {
         total_exec_diff += exec_diff;
 
         let BlockExecutionOutput {
-            state,
+            state: _,
             receipts,
             requests,
-            ..
+            gas_used,
         } = state;
 
         // do post validation
@@ -146,23 +146,23 @@ fn run_block() -> Result<(), Error> {
         total_post_validation_diff += val_dur;
 
         // calculate and check state root
-        let state_provider_2 = blockchain_db.latest().unwrap();
-        println!("Start calculate state root.");
-        println!(
-            "print bundle state: {:?}\n bundle state.state: {:?}",
-            state, state.state
-        );
+        // let state_provider_2 = blockchain_db.latest().unwrap();
+        // println!("Start calculate state root.");
+        // println!(
+        //     "print bundle state: {:?}\n bundle state.state: {:?}",
+        //     state, state.state
+        // );
         let merkle_start = Instant::now();
-        let state_root = state_provider_2.state_root(&state);
+        // let state_root = state_provider_2.state_root(&state);
 
         let merkle_dur = merkle_start.elapsed();
-        total_merkle_dur += merkle_dur;
+        // total_merkle_dur += merkle_dur;
 
-        println!("Show block state_root: {:?}", state_root);
+        // println!("Show block state_root: {:?}", state_root);
         round_num += 1;
         // gas_used_sum += gas_used;
 
-        println!("Current block num: {:?}, round: {:?}, exec_time: {:?}, valiation_time: {:?}, merkle_time: {:?}", new_block_num, round_num, exec_diff, val_dur, merkle_dur);
+        println!("Current block num: {:?}, round: {:?}, exec_time: {:?}, valiation_time: {:?}, merkle_time: {:?}, gas_used: {:?}", new_block_num, round_num, exec_diff, val_dur, merkle_dur, gas_used);
     }
 
     // 確保channel能完成所有工作
