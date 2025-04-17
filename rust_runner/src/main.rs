@@ -9,11 +9,14 @@ use reth_chainspec::MAINNET;
 
 use reth_primitives::{BlockId, U256};
 
-use reth_revm::database::StateProviderDatabase;
+use reth_revm::{database::StateProviderDatabase, State};
 
-use reth_evm::execute::{BlockExecutionOutput, Executor};
+use reth_evm::execute::{self, BlockExecutionOutput, Executor};
 
-use reth_evm_ethereum::execute::EthExecutorProvider;
+use reth_evm_ethereum::{
+    execute::{EthBlockExecutor, EthExecutorProvider},
+    EthEvmConfig,
+};
 
 use reth_blockchain_tree::{
     BlockchainTree, BlockchainTreeConfig, ShareableBlockchainTree, TreeExternals,
@@ -78,7 +81,7 @@ fn run_block() -> Result<(), Error> {
 
     let mut total_exec_diff = Duration::ZERO;
     let mut total_post_validation_diff = Duration::ZERO;
-    // let mut total_merkle_dur = Duration::ZERO;
+    let mut total_merkle_dur = Duration::ZERO;
     let start_time = Instant::now();
 
     // Execute Block by block number
@@ -105,7 +108,15 @@ fn run_block() -> Result<(), Error> {
             .unwrap();
         let state_provider_db = StateProviderDatabase::new(state_provider);
 
-        let executor = EthExecutorProvider::mainnet().eth_executor(state_provider_db);
+        let executor = EthBlockExecutor::new(
+            MAINNET.clone(),
+            EthEvmConfig::default(),
+            State::builder()
+                .with_database(state_provider_db)
+                .with_bundle_update()
+                .without_state_clear()
+                .build(),
+        );
 
         // execution
         let exec_start_time = Instant::now();
