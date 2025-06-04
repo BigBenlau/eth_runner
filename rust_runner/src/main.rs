@@ -46,6 +46,8 @@ fn run_block() -> Result<(), Error> {
     // Read Database Info
     // written in bin/reth/src/commands/debug_cmd/build_block.rs (from line 147)
 
+    let pre_create_start_time = Instant::now();
+
     let db_path_str =
         String::from("/home/user/common/docker/volumes/eth-docker_reth-el-data/_data/db");
     let db_path = Path::new(&db_path_str);
@@ -76,12 +78,14 @@ fn run_block() -> Result<(), Error> {
     let blockchain_db =
         BlockchainProvider::new(provider_factory.clone(), blockchain_tree.clone()).unwrap();
 
+    let pre_create_diff = pre_create_start_time.elapsed();
+    println!("Pre create time is {:?} s", pre_create_diff.as_secs_f64());
     // 创建一个通道
     // let _ = start_channel();
 
     let mut total_exec_diff = Duration::ZERO;
     let mut total_post_validation_diff = Duration::ZERO;
-    let mut total_merkle_dur = Duration::ZERO;
+    // let  total_merkle_dur = Duration::ZERO;
     let start_time = Instant::now();
 
     // Execute Block by block number
@@ -94,6 +98,8 @@ fn run_block() -> Result<(), Error> {
         .from_reader(file);
 
     for result in reader.records() {
+        let create_executor_start_time = Instant::now();
+
         let record = result?;
         let new_block_num = record[0].parse::<u64>().unwrap();
 
@@ -108,14 +114,18 @@ fn run_block() -> Result<(), Error> {
             .unwrap();
         let state_provider_db = StateProviderDatabase::new(state_provider);
 
-        let executor = EthBlockExecutor::new(
-            MAINNET.clone(),
-            EthEvmConfig::default(),
-            State::builder()
-                .with_database(state_provider_db)
-                .with_bundle_update()
-                .without_state_clear()
-                .build(),
+        let state = State::builder()
+            .with_database(state_provider_db)
+            .with_bundle_update()
+            .without_state_clear()
+            .build();
+
+        let executor = EthBlockExecutor::new(MAINNET.clone(), EthEvmConfig::default(), state);
+
+        let create_executor_diff = create_executor_start_time.elapsed();
+        println!(
+            "Create executor time is {:?} s",
+            create_executor_diff.as_secs_f64()
         );
 
         // execution
@@ -142,8 +152,9 @@ fn run_block() -> Result<(), Error> {
                 PostExecutionInput::new(&receipts, &requests),
             )
             .ok();
-        let val_dur = val_start_time.elapsed();
-        total_post_validation_diff += val_dur;
+        let val_diff = val_start_time.elapsed();
+        println!("Post validation time is {:?} s", val_diff.as_secs_f64());
+        total_post_validation_diff += val_diff;
 
         // calculate and check state root
         // let state_provider_2 = blockchain_db.latest().unwrap();
@@ -152,17 +163,17 @@ fn run_block() -> Result<(), Error> {
         //     "print bundle state: {:?}\n bundle state.state: {:?}",
         //     state, state.state
         // );
-        let merkle_start = Instant::now();
+        // let merkle_start = Instant::now();
         // let state_root = state_provider_2.state_root(&state);
 
-        let merkle_dur = merkle_start.elapsed();
+        // let merkle_dur = merkle_start.elapsed();
         // total_merkle_dur += merkle_dur;
 
         // println!("Show block state_root: {:?}", state_root);
         round_num += 1;
         // gas_used_sum += gas_used;
 
-        println!("Current block num: {:?}, round: {:?}, exec_time: {:?}, valiation_time: {:?}, merkle_time: {:?}, gas_used: {:?}", new_block_num, round_num, exec_diff, val_dur, merkle_dur, gas_used);
+        println!("Current block num: {:?}, round: {:?}, exec_time: {:?}, valiation_time: {:?}, gas_used: {:?}", new_block_num, round_num, exec_diff, val_diff, gas_used);
     }
 
     // 確保channel能完成所有工作
@@ -181,13 +192,7 @@ fn run_block() -> Result<(), Error> {
         "Total Post Validation Time is {:?} s",
         total_post_validation_diff.as_secs_f64()
     );
-    println!(
-        "Total Merkleization Time is {:?} s\n",
-        total_merkle_dur.as_secs_f64()
-    );
 
-    // let gas_per_ms = gas_used_sum / exec_time_sum.as_millis();
-    // println!("Total Gas Used is {:?} \nTotal Execution Time is {:?}\n Gas Used per millisecond is {:?}", gas_used_sum, exec_time_sum, gas_per_ms);
     Ok(())
 }
 
