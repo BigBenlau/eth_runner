@@ -135,6 +135,7 @@ fn run_block() -> Result<(), Error> {
         let state = executor.execute((&new_block, U256::ZERO).into()).unwrap();
 
         let exec_diff = exec_start_time.elapsed();
+        println!("Execution time is {:?} s", exec_diff.as_secs_f64());
         total_exec_diff += exec_diff;
 
         let BlockExecutionOutput {
