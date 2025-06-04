@@ -24,7 +24,7 @@ func check(e error) {
 
 func ReadTest3() {
 	pre_create_start_time := time.Now()
-	datadir := "/home/user/common/docker/volumes/cp1_eth-docker_geth-eth1-data/_data/geth/chaindata"
+	datadir := "/home/user/common/docker/volumes/eth-docker_geth-eth1-data/_data/geth/chaindata"
 	// datadir := "/home/user/data/ben/cp1_eth-docker_geth-eth1-data/_data/geth/chaindata"
 	ancient := datadir + "/ancient"
 	db, err := rawdb.Open(
@@ -47,6 +47,7 @@ func ReadTest3() {
 	// datadir: cp1_eth-docker
 	bc, _ := core.NewBlockChain(db, core.DefaultCacheConfigWithScheme(rawdb.HashScheme), nil, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
 	fmt.Println("get bc")
+	// fmt.Println(bc.CurrentHeader().Number.Uint64())			// 20306538 (server01: eth-docker_geth-eth1-data)
 
 	pre_create_diff := time.Since(pre_create_start_time)
 	fmt.Println("Pre create time is ", pre_create_diff)
@@ -56,7 +57,6 @@ func ReadTest3() {
 	// headnumber := *headnumber_adr
 
 	total_exec_elapsedTime := time.Duration(0)
-	total_exec_time := time.Duration(0)
 	total_used_gas := uint64(0)
 	// parallel.Start_channel()
 
@@ -110,15 +110,9 @@ func ReadTest3() {
 		_, _, usedGas, _ := bc.Processor().Process(block, statedb, vm.Config{})
 		exec_elapsedTime := time.Since(exec_startTime)
 
-		trieRead := statedb.SnapshotAccountReads + statedb.AccountReads // The time spent on account read
-		trieRead += statedb.SnapshotStorageReads + statedb.StorageReads // The time spent on storage read
-		exec_time := exec_elapsedTime - trieRead                        // The time spent on EVM processing
-
-		fmt.Println("Execution time is ", exec_elapsedTime)
-		fmt.Println("Execution time is ", exec_time)
+		fmt.Println("Execution Elapsed Time is ", exec_elapsedTime)
 
 		total_exec_elapsedTime += exec_elapsedTime
-		total_exec_time += exec_time
 		total_used_gas += usedGas
 	}
 	// loop finish
@@ -130,7 +124,6 @@ func ReadTest3() {
 
 	fmt.Println("Total Run Loop Time:", run_elapsedTime)
 	fmt.Println("Total Elapsed Time:", total_exec_elapsedTime)
-	fmt.Println("Total Exec Time:", total_exec_time)
 	fmt.Println("Total Used Gas:", total_used_gas)
 
 }
