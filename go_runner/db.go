@@ -12,13 +12,9 @@ import (
 	"github.com/ethereum/go-ethereum/consensus/ethash"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
+	// "github.com/ethereum/go-ethereum/parallel"
 )
-
-// var prefetch_control bool = true
 
 func check(e error) {
 	if e != nil {
@@ -26,54 +22,9 @@ func check(e error) {
 	}
 }
 
-func get_block_num(csvReader *csv.Reader) (uint64, bool) {
-	rec, err := csvReader.Read()
-	if err == io.EOF || rec[0] == "" {
-		return 0, true
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-	headnumber, _ := strconv.ParseUint(rec[0], 10, 64)
-	return headnumber, false
-}
-
-func get_pre_block_data(bc *core.BlockChain, db ethdb.Database, headnumber uint64) (*types.Block, *state.StateDB) {
-	parentnumber := headnumber - 1
-	hashtest := rawdb.ReadCanonicalHash(db, headnumber)
-	parenthash := rawdb.ReadCanonicalHash(db, parentnumber)
-
-	cur_block := bc.GetBlock(hashtest, headnumber)
-	if cur_block == nil {
-		log.Fatal("Failed to retrieve the latest block header")
-	}
-	parentblock := bc.GetBlock(parenthash, parentnumber)
-	if parentblock == nil {
-		log.Fatal("Failed to retrieve the pervious block")
-	}
-
-	parentRoot := parentblock.Root()
-	statedb, stateErr := bc.StateAt(parentRoot)
-	if stateErr != nil {
-		log.Fatal("Failed to retrieve the statedb of parentRoot")
-	}
-	return cur_block, statedb
-}
-
-func exec_tx(tx *types.Transaction, idx int, signer types.Signer, evm *vm.EVM, cur_block *types.Block, cur_statedb *state.StateDB) {
-	msg, _ := core.TransactionToMessage(tx, signer, cur_block.BaseFee())
-	txContext := core.NewEVMTxContext(msg)
-	cur_statedb.SetTxContext(tx.Hash(), idx)
-	evm.Reset(txContext, cur_statedb)
-	_, err := core.ApplyMessage(evm, msg, new(core.GasPool).AddGas(tx.Gas()))
-	if err != nil {
-		log.Fatal(fmt.Errorf("transaction %#x failed: %v", tx.Hash(), err))
-	}
-	cur_statedb.Finalise(evm.ChainConfig().IsEIP158(cur_block.Number()))
-}
-
 func ReadTest3() {
-	datadir := "/home/user/common/docker/volumes/eth-docker_geth-eth1-data/_data/geth/chaindata"
+	pre_create_start_time := time.Now()
+	datadir := "/home/user/common/docker/volumes/cp1_eth-docker_geth-eth1-data/_data/geth/chaindata"
 	// datadir := "/home/user/data/ben/cp1_eth-docker_geth-eth1-data/_data/geth/chaindata"
 	ancient := datadir + "/ancient"
 	db, err := rawdb.Open(
@@ -97,12 +48,14 @@ func ReadTest3() {
 	bc, _ := core.NewBlockChain(db, core.DefaultCacheConfigWithScheme(rawdb.HashScheme), nil, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
 	fmt.Println("get bc")
 
+	pre_create_diff := time.Since(pre_create_start_time)
+	fmt.Println("Pre create time is ", pre_create_diff)
+
 	// headhash := rawdb.ReadHeadHeaderHash(db)
 	// headnumber_adr := rawdb.ReadHeaderNumber(db, headhash)
 	// headnumber := *headnumber_adr
 
 	total_exec_elapsedTime := time.Duration(0)
-	total_validate_elapsedTime := time.Duration(0)
 	total_exec_time := time.Duration(0)
 	total_used_gas := uint64(0)
 	// parallel.Start_channel()
@@ -114,91 +67,59 @@ func ReadTest3() {
 	defer f.Close()
 
 	csvReader := csv.NewReader(f)
-	first_block_tag := true
-
-	var final_flag bool
-
-	var cur_block_num uint64
-	var cur_statedb *state.StateDB
-	var cur_block *types.Block
-
-	var follow_block_num uint64
-	var follow_statedb *state.StateDB
-	var follow_block *types.Block
 
 	run_start_time := time.Now()
 	for {
-		if first_block_tag {
-			cur_block_num, final_flag = get_block_num(csvReader)
-			cur_block, cur_statedb = get_pre_block_data(bc, db, cur_block_num)
-			first_block_tag = false
-		} else {
-			cur_block_num = follow_block_num
-			cur_statedb = follow_statedb
-			cur_block = follow_block
-		}
-
-		if final_flag {
+		create_executor_start_time := time.Now()
+		rec, err := csvReader.Read()
+		if err == io.EOF || rec[0] == "" {
 			break
 		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		headnumber, _ := strconv.ParseUint(rec[0], 10, 64)
 
-		fmt.Println("Headnumber is:", cur_block_num, "round idx is: ", round_count)
+		fmt.Println("Headnumber is:", headnumber, "round idx is: ", round_count)
 		round_count += 1
 
-		// // concurrent run the following block
-		// var followupInterrupt atomic.Bool
-		// if prefetch_control {
-		// 	if follow_block_num > 0 {
-		// 		go bc.RunPrefetcherBen(follow_block, follow_statedb.Copy(), &followupInterrupt)
-		// 	}
-		// }
+		parentnumber := headnumber - 1
+		hashtest := rawdb.ReadCanonicalHash(db, headnumber)
+		parenthash := rawdb.ReadCanonicalHash(db, parentnumber)
+		block := rawdb.ReadBlock(db, hashtest, headnumber)
 
-		var (
-			context = core.NewEVMBlockContext(cur_block.Header(), bc, nil)
-			vmenv   = vm.NewEVM(context, vm.TxContext{}, cur_statedb, bc.Config(), vm.Config{})
-			signer  = types.MakeSigner(bc.Config(), cur_block.Number(), cur_block.Time())
-		)
-		pre_state_root := cur_statedb.IntermediateRoot(bc.Config().IsEIP158(cur_block.Number())).String()
-		fmt.Println("state_root:", pre_state_root)
-
-		core.ProcessBeaconBlockRoot(*cur_block.BeaconRoot(), vmenv, cur_statedb)
-
-		for idx, tx := range cur_block.Transactions() {
-			exec_startTime := time.Now()
-			// _, _, usedGas, _, op_count, op_time, op_time_list, op_gas_list := bc.Processor().Process(block, statedb, vm.Config{})
-			// receipts, _, usedGas, _, _, _, _, _ := bc.Processor().Process(cur_block, cur_statedb, vm.Config{})
-			exec_tx(tx, idx, signer, vmenv, cur_block, cur_statedb)
-			exec_elapsedTime := time.Since(exec_startTime)
-
-			trieRead := cur_statedb.SnapshotAccountReads + cur_statedb.AccountReads // The time spent on account read
-			trieRead += cur_statedb.SnapshotStorageReads + cur_statedb.StorageReads // The time spent on storage read
-			exec_time := exec_elapsedTime - trieRead                                // The time spent on EVM processing
-
-			total_exec_elapsedTime += exec_elapsedTime
-			total_exec_time += exec_time
-			fmt.Println("Cur tx idx: ", idx, "exec_elapsedTime: ", exec_elapsedTime, "exec_time: ", exec_time)
-			// total_used_gas += usedGas
+		if block == nil {
+			log.Fatal("Failed to retrieve the latest block header")
+		}
+		parentblock := rawdb.ReadBlock(db, parenthash, parentnumber)
+		if parentblock == nil {
+			log.Fatal("Failed to retrieve the latest block header")
 		}
 
-		fmt.Println("total_exec_elapsedTime: ", total_exec_elapsedTime, "total_exec_time: ", total_exec_time)
-
-		validate_startTime := time.Now()
-		state_root := cur_statedb.IntermediateRoot(bc.Config().IsEIP158(cur_block.Number())).String()
-		// bc.Validator().ValidateState(cur_block, cur_statedb, receipts, usedGas)
-		validate_elapsedTime := time.Since(validate_startTime)
-		fmt.Println("state_root:", state_root, "validate_elapsedTime:", validate_elapsedTime)
-		fmt.Println("header_root:", cur_block.Header().Root)
-
-		// total_validate_elapsedTime += validate_elapsedTime
-
-		// if prefetch_control {
-		// 	followupInterrupt.Store(true)
-		// }
-
-		follow_block_num, final_flag = get_block_num(csvReader)
-		if follow_block_num > 0 {
-			follow_block, follow_statedb = get_pre_block_data(bc, db, follow_block_num)
+		parentRoot := parentblock.Root()
+		statedb, _ := bc.StateAt(parentRoot)
+		if statedb == nil {
+			log.Fatal("Failed to retrieve the statedb of parentRoot")
 		}
+
+		create_executor_diff := time.Since(create_executor_start_time)
+		fmt.Println("Create executor time is ", create_executor_diff)
+
+		exec_startTime := time.Now()
+		// _, _, usedGas, _, op_count, op_time, op_time_list, op_gas_list := bc.Processor().Process(block, statedb, vm.Config{})
+		_, _, usedGas, _ := bc.Processor().Process(block, statedb, vm.Config{})
+		exec_elapsedTime := time.Since(exec_startTime)
+
+		trieRead := statedb.SnapshotAccountReads + statedb.AccountReads // The time spent on account read
+		trieRead += statedb.SnapshotStorageReads + statedb.StorageReads // The time spent on storage read
+		exec_time := exec_elapsedTime - trieRead                        // The time spent on EVM processing
+
+		fmt.Println("Execution time is ", exec_elapsedTime)
+		fmt.Println("Execution time is ", exec_time)
+
+		total_exec_elapsedTime += exec_elapsedTime
+		total_exec_time += exec_time
+		total_used_gas += usedGas
 	}
 	// loop finish
 
@@ -209,7 +130,6 @@ func ReadTest3() {
 
 	fmt.Println("Total Run Loop Time:", run_elapsedTime)
 	fmt.Println("Total Elapsed Time:", total_exec_elapsedTime)
-	fmt.Println("Total Validate Time:", total_validate_elapsedTime)
 	fmt.Println("Total Exec Time:", total_exec_time)
 	fmt.Println("Total Used Gas:", total_used_gas)
 
