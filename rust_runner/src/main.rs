@@ -84,7 +84,7 @@ fn run_block() -> Result<(), Error> {
     // let _ = start_channel();
 
     let mut total_exec_diff = Duration::ZERO;
-    let mut total_post_validation_diff = Duration::ZERO;
+    // let mut total_post_validation_diff = Duration::ZERO;
     // let  total_merkle_dur = Duration::ZERO;
     let start_time = Instant::now();
 
@@ -140,22 +140,22 @@ fn run_block() -> Result<(), Error> {
 
         let BlockExecutionOutput {
             state: _,
-            receipts,
-            requests,
+            receipts: _,
+            requests: _,
             gas_used,
         } = state;
 
-        // do post validation
-        let val_start_time = Instant::now();
-        consensus
-            .validate_block_post_execution(
-                &new_block,
-                PostExecutionInput::new(&receipts, &requests),
-            )
-            .ok();
-        let val_diff = val_start_time.elapsed();
-        println!("Post validation time is {:?} s", val_diff.as_secs_f64());
-        total_post_validation_diff += val_diff;
+        // // do post validation
+        // let val_start_time = Instant::now();
+        // consensus
+        //     .validate_block_post_execution(
+        //         &new_block,
+        //         PostExecutionInput::new(&receipts, &requests),
+        //     )
+        //     .ok();
+        // let val_diff = val_start_time.elapsed();
+        // println!("Post validation time is {:?} s", val_diff.as_secs_f64());
+        // total_post_validation_diff += val_diff;
 
         // calculate and check state root
         // let state_provider_2 = blockchain_db.latest().unwrap();
@@ -174,7 +174,10 @@ fn run_block() -> Result<(), Error> {
         round_num += 1;
         // gas_used_sum += gas_used;
 
-        println!("Current block num: {:?}, round: {:?}, exec_time: {:?}, valiation_time: {:?}, gas_used: {:?}", new_block_num, round_num, exec_diff, val_diff, gas_used);
+        println!(
+            "Current block num: {:?}, round: {:?}, exec_time: {:?}, gas_used: {:?}",
+            new_block_num, round_num, exec_diff, gas_used
+        );
     }
 
     // 確保channel能完成所有工作
@@ -189,10 +192,10 @@ fn run_block() -> Result<(), Error> {
         "Total Execution Time is {:?} s",
         total_exec_diff.as_secs_f64()
     );
-    println!(
-        "Total Post Validation Time is {:?} s",
-        total_post_validation_diff.as_secs_f64()
-    );
+    // println!(
+    //     "Total Post Validation Time is {:?} s",
+    //     total_post_validation_diff.as_secs_f64()
+    // );
 
     Ok(())
 }
