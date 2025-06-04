@@ -90,7 +90,7 @@ fn run_block() -> Result<(), Error> {
 
     // Execute Block by block number
     let mut round_num = 0;
-    // let gas_used_sum = 0;
+    let mut gas_used_sum = 0;
 
     let file = File::open("../block_range.csv")?;
     let mut reader = csv::ReaderBuilder::new()
@@ -172,7 +172,7 @@ fn run_block() -> Result<(), Error> {
 
         // println!("Show block state_root: {:?}", state_root);
         round_num += 1;
-        // gas_used_sum += gas_used;
+        gas_used_sum += gas_used;
 
         println!(
             "Current block num: {:?}, round: {:?}, exec_time: {:?}, gas_used: {:?}",
@@ -196,6 +196,7 @@ fn run_block() -> Result<(), Error> {
     //     "Total Post Validation Time is {:?} s",
     //     total_post_validation_diff.as_secs_f64()
     // );
+    println!("Total Gas Used is {:?}", gas_used_sum);
 
     Ok(())
 }
